@@ -33,8 +33,6 @@ apps:
     install-mode: disable
     restart-condition: on-failure
     restart-delay: 2s
-    environment:
-      DCGM_HOME_DIR: "${SNAP_COMMON}"
   dcgmi:
     command: usr/bin/dcgmi
     plugs:
