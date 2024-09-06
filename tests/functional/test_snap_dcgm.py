@@ -12,6 +12,6 @@ def test_dcgm_exporter_endpoint():
 
     subprocess.run(["sudo", "snap", "connect", "dcgm:network-bind"])
     print("reconnect")
-    sleep(5) # should be sufficient for the service to restart
-    
+    sleep(5)  # should be sufficient for the service to restart
+
     assert 0 == subprocess.run(["curl", dcgm_exporter_endpoint]).returncode
