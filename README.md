@@ -15,4 +15,5 @@ make build
 
 ```shell
 snap install --dangerous ./dcgm.snap
+sudo systemctl enable snap.dcgm.dcgm-exporter.service --now # enable and start dcgm-exporter service
 ```
