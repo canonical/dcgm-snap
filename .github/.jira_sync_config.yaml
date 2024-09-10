@@ -15,7 +15,7 @@ settings:
   # (Optional) Jira project components that should be attached to the created issue
   # Component names are case-sensitive
   components:
-    - hardware-observer
+    - dcgm
 
   # (Optional) (Default: None) Parent Epic key to link the issue to
   epic_key: SOLENG-46
