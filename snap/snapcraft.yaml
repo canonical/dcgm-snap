@@ -18,7 +18,7 @@ title: NVIDIA DCGM
 
 apps:
   dcgm-exporter:
-    command: bin/dcgm-exporter
+    command: bin/dcgm-exporter -f $SNAP/dcgm-custom-metrics.csv
     plugs:
       - network-bind
       - opengl
