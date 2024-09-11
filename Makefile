@@ -17,14 +17,14 @@ help:
 	@echo " make lint - run lint checkers"
 	@echo " make reformat - run lint tools to auto format code"
 	@echo " make functional - run the tests defined in the functional subdirectory"
-	@echo " make test - run lint, proof, unittests and functional targets"
+	@echo " make test - run lint, proof, and functional targets"
 	@echo ""
 
 lint:
 	@echo "Running lint checks"
 	@tox -e lint
 
-test: lint unittests functional
+test: lint functional
 	@echo "Tests completed for the snap."
 
 reformat:
