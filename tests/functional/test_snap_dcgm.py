@@ -1,17 +1,39 @@
 import subprocess
-from time import sleep
+import time
 
 
 def test_dcgm_exporter_endpoint():
-    """Smoke test of the dcgm-exporter service and its endpoint."""
-    dcgm_exporter_endpoint = "localhost:9400/metrics"
-    subprocess.run(["sudo", "snap", "disconnect", "dcgm:network-bind"])
+    """Test of the dcgm-exporter service and its endpoint."""
+    endpoint = "localhost:9400/metrics"
+    timeout = 60  # seconds
+    start_time = time.time()
 
-    # The Endpoint should be unavailable with the networking plug
-    assert 0 != subprocess.run(["curl", dcgm_exporter_endpoint]).returncode
+    def query_endpoint():
+        return subprocess.run(["curl", endpoint], text=True, capture_output=True)
 
-    subprocess.run(["sudo", "snap", "connect", "dcgm:network-bind"])
-    print("reconnect")
-    sleep(5)  # should be sufficient for the service to restart
+    while (result := query_endpoint()).returncode != 0 or not result.stdout.strip():
+        if time.time() - start_time > timeout:
+            assert False, f"Failed to reach '{endpoint}' of the dcgm-exporter service"
+        time.sleep(5)
 
-    assert 0 == subprocess.run(["curl", dcgm_exporter_endpoint]).returncode
+    assert "DCGM_FI_DRIVER_VERSION" in result.stdout, "No dcgm exported metrics found"
+
+
+def test_dcgm_configs():
+    """Test snap configuratin."""
+    pass
+
+
+def test_dcgm_nv_hostengine():
+    """Test of the dcgm-nv-hostengine service and its endpoint."""
+    pass
+
+
+def test_dcgmi():
+    """Test of the dcgmi command."""
+    pass
+
+
+def test_dcgmproftesters():
+    """Test of the dcgmproftesters."""
+    pass

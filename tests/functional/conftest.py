@@ -1,6 +1,6 @@
 import os
 import subprocess
-from time import sleep
+import time
 
 import pytest
 
@@ -10,17 +10,27 @@ def install_dcgm_snap():
     """Install the snap and enable dcgm-exporter service for testing."""
     snap = os.environ["TEST_SNAP"]
     dcgm_exporter_service = "snap.dcgm.dcgm-exporter.service"
-    assert 0 == subprocess.run(["sudo", "snap", "install", "--dangerous", snap]).returncode
-
-    subprocess.run(["sudo", "systemctl", "enable", "--now", dcgm_exporter_service])
-    sleep(5)  # Give some time for the service to start
 
     assert (
-        0
-        == subprocess.run(
+        0 == subprocess.run(["sudo", "snap", "install", "--dangerous", snap]).returncode
+    ), f"Failed to install {snap}"
+
+    subprocess.run(["sudo", "systemctl", "enable", "--now", dcgm_exporter_service])
+
+    dcgm_exporter_is_active = (
+        lambda: subprocess.call(
             ["sudo", "systemctl", "is-active", "--quiet", dcgm_exporter_service]
-        ).returncode
+        )
+        == 0
     )
+
+    timeout = 30  # seconds
+    start_time = time.time()
+
+    while not dcgm_exporter_is_active():
+        if time.time() - start_time > timeout:
+            assert False, f"Failed to start {dcgm_exporter_service} service"
+        time.sleep(5)
 
     yield
 
