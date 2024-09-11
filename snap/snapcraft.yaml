@@ -25,14 +25,13 @@ package-repositories:
 
 apps:
   dcgm-exporter:
-    command: bin/dcgm-exporter
+    command: run_dcgm_exporter.sh
     plugs:
       - network-bind
       - opengl
     daemon: simple
     install-mode: disable
     restart-condition: on-failure
-    restart-delay: 2s
   dcgmi:
     command: usr/bin/dcgmi
     plugs:
@@ -61,6 +60,7 @@ parts:
     override-build: |
       craftctl default
       chmod +x run_nv_hostengine.sh
+      chmod +x run_dcgm_exporter.sh
   dcgm-exporter:
     plugin: go
     stage-packages: [datacenter-gpu-manager]

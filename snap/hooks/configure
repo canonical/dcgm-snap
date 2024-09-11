@@ -3,4 +3,10 @@
 # Register config options if unset,
 # so users can see available options by running
 # `sudo snap get dcgm`.
-[ -z "$(snapctl get nv-hostengine-port)" ] && snapctl set nv-hostengine-port=
+if [ -z "$(snapctl get nv-hostengine-port)" ]; then
+    snapctl set nv-hostengine-port=""
+fi
+
+if [ -z "$(snapctl get dcgm_exporter_listen)" ]; then
+    snapctl set dcgm_exporter_listen=""
+fi
