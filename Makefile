@@ -16,7 +16,6 @@ help:
 	@echo " make build - build the snap"
 	@echo " make lint - run lint checkers"
 	@echo " make reformat - run lint tools to auto format code"
-	@echo " make unittests - run the tests defined in the unittest subdirectory"
 	@echo " make functional - run the tests defined in the functional subdirectory"
 	@echo " make test - run lint, proof, unittests and functional targets"
 	@echo ""
@@ -24,10 +23,6 @@ help:
 lint:
 	@echo "Running lint checks"
 	@tox -e lint
-
-unittests:
-	@echo "Running unit tests"
-	@tox -e unit -- ${UNIT_ARGS}
 
 test: lint unittests functional
 	@echo "Tests completed for the snap."
