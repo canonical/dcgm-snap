@@ -1,3 +1,4 @@
+import json
 import subprocess
 import time
 
@@ -19,21 +20,47 @@ def test_dcgm_exporter_endpoint():
     assert "DCGM_FI_DRIVER_VERSION" in result.stdout, "No dcgm exported metrics found"
 
 
-def test_dcgm_configs():
-    """Test snap configuratin."""
-    pass
-
-
 def test_dcgm_nv_hostengine():
-    """Test of the dcgm-nv-hostengine service and its endpoint."""
-    pass
+    """Check the dcgm-nv-hostengine service."""
+    assert 0 == subprocess.call(
+        ["sudo", "systemctl", "is-active", "--quiet", "snap.dcgm.nv-hostengine.service"]
+    ), "DCGM NV Hostengine service is not running"
 
 
 def test_dcgmi():
     """Test of the dcgmi command."""
-    pass
+    result = subprocess.run(["dcgm.dcgmi", "discovery", "-l"], capture_output=True, text=True)
+    print(result)
+    assert "GPU ID" in result.stdout.strip(), "DCGMI is not working"
 
 
 def test_dcgmproftesters():
     """Test of the dcgmproftesters."""
     pass
+
+
+def test_dcgm_port_configs():
+    """Test snap port configuratin."""
+    services = ["snap.dcgm.dcgm-exporter.service", "snap.dcgm.nv-hostengine.service"]
+    configs = ["dcgm-exporter-listen", "nv-hostengine-port"]
+    new_values = [":9466", "5666"]
+
+    result = subprocess.run(
+        ["sudo", "snap", "get", "dcgm", "-d"], check=True, capture_output=True, text=True
+    )
+    pairs = json.loads(result.stdout.strip())
+    assert all(config in pairs for config in configs), "Missing snap configuration keys"
+
+    for config, new_value in zip(configs, new_values):
+        assert 0 == subprocess.call(
+            ["sudo", "snap", "set", "dcgm", f"{config}={new_value}"]
+        ), f"Failed to set snap configuration key '{config}'"
+
+    # restart the service to apply the new configuration
+    for service in services:
+        subprocess.run(["sudo", "systemctl", "restart", service])
+
+    for service, port in zip(services, new_values):
+        assert 0 == subprocess.call(
+            ["sudo", "lsof", "-i", f":{port.lstrip(':')}"]
+        ), f"{service} port is not listening"
