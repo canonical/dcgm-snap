@@ -53,7 +53,7 @@ module = ["setuptools"]
 [tool.coverage.run]
 relative_files = true
 source = ["."]
-omit = ["tests/**", "docs/**", "lib/**", "snap/**", "build/**", "setup.py"]
+omit = ["docs/**", "lib/**", "snap/**", "build/**", "setup.py"]
 
 [tool.coverage.report]
 fail_under = 100
