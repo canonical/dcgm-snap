@@ -9,7 +9,7 @@ def install_dcgm_snap():
     """Install the snap and enable dcgm-exporter service for testing."""
     with open("snap/snapcraft.yaml") as f:
         snapcraft = yaml.safe_load(f)
-        snap_build_name = f"{snapcraft['name']}_*_amd64.snap"
+        snap_build_name = f"{snapcraft['name']}_*.snap"
 
         subprocess.run(
             f"sudo snap install --devmode {snap_build_name}",

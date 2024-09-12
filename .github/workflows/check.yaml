@@ -27,6 +27,11 @@ jobs:
         with:
           fetch-depth: 0  # Complete git history is required to generate the version from git tags.
 
+      - name: Setup Python 3.10
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
       - name: Install dependencies
         run: |
           sudo apt update
@@ -39,7 +44,7 @@ jobs:
       - name: Lint tests
         run: tox -e lint
 
-  func:
+  build:
     needs:
       - lint
     runs-on: ubuntu-22.04
@@ -51,8 +56,31 @@ jobs:
       - name: Verify snap builds successfully
         uses: snapcore/action-build@v1
 
+      - name: Upload the built snap
+        uses: actions/upload-artifact@v4
+        with:
+          name: SNAP_FILE
+          path: dcgm.snap
+
+  func:
+    needs:
+      - build
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download the built snap
+        uses: actions/download-artifact@v4
+        with:
+          name: SNAP_FILE
+
+      - name: Setup Python 3.10
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
       - name: Install dependencies
         run: pipx install tox
 
       - name: Run tests
-        run: tox -e func
+        run: TEST_SNAP=$GITHUB_WORKSPACE/dcgm.snap tox -e func
