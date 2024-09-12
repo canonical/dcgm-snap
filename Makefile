@@ -47,4 +47,4 @@ functional: build
 	@TEST_SNAP=${SNAP_FILE} tox -e func -- ${FUNC_ARGS}
 
 # The targets below don't depend on a file
-.PHONY: help clean build lint reformat unittests functional test
+.PHONY: help clean build lint reformat functional test

@@ -29,8 +29,7 @@ def test_dcgm_nv_hostengine():
 
 def test_dcgmi():
     """Test of the dcgmi command."""
-    result = subprocess.run(["dcgm.dcgmi", "discovery", "-l"], capture_output=True, text=True)
-    print(result)
+    result = subprocess.run(["dcgm.dcgmi", "discovery", "-l"], check=True, capture_output=True, text=True)
     assert "GPU ID" in result.stdout.strip(), "DCGMI is not working"
 
 
