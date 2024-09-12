@@ -1,37 +1,23 @@
-import os
 import subprocess
-import time
 
 import pytest
+import yaml
 
 
 @pytest.fixture(scope="session", autouse=True)
 def install_dcgm_snap():
     """Install the snap and enable dcgm-exporter service for testing."""
-    snap = os.environ["TEST_SNAP"]
-    dcgm_exporter_service = "snap.dcgm.dcgm-exporter.service"
+    with open("snap/snapcraft.yaml") as f:
+        snapcraft = yaml.safe_load(f)
+        snap_build_name = f"{snapcraft['name']}_*_amd64.snap"
 
-    assert (
-        0 == subprocess.run(["sudo", "snap", "install", "--dangerous", snap]).returncode
-    ), f"Failed to install {snap}"
-
-    subprocess.run(["sudo", "snap", "start", "dcgm.dcgm-exporter"])
-
-    dcgm_exporter_is_active = (
-        lambda: subprocess.call(
-            ["sudo", "systemctl", "is-active", "--quiet", dcgm_exporter_service]
+        subprocess.run(
+            f"sudo snap install --devmode {snap_build_name}",
+            check=True,
+            capture_output=True,
+            shell=True,
         )
-        == 0
-    )
 
-    timeout = 30  # seconds
-    start_time = time.time()
+        yield
 
-    while not dcgm_exporter_is_active():
-        if time.time() - start_time > timeout:
-            assert False, f"Failed to start {dcgm_exporter_service} service"
-        time.sleep(5)
-
-    yield
-
-    subprocess.run(["sudo", "snap", "remove", "--purge", "dcgm"])
+        subprocess.run("sudo snap remove --purge dcgm".split(), check=True)
