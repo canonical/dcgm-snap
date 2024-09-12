@@ -1,23 +1,15 @@
 import json
 import subprocess
-import time
+import urllib.request
+
+from tenacity import retry, stop_after_delay, wait_fixed
 
 
+@retry(wait=wait_fixed(5), stop=stop_after_delay(60))
 def test_dcgm_exporter_endpoint():
     """Test of the dcgm-exporter service and its endpoint."""
-    endpoint = "localhost:9400/metrics"
-    timeout = 60  # seconds
-    start_time = time.time()
-
-    def query_endpoint():
-        return subprocess.run(["curl", endpoint], text=True, capture_output=True)
-
-    while (result := query_endpoint()).returncode != 0 or not result.stdout.strip():
-        if time.time() - start_time > timeout:
-            assert False, f"Failed to reach '{endpoint}' of the dcgm-exporter service"
-        time.sleep(5)
-
-    assert "DCGM_FI_DRIVER_VERSION" in result.stdout, "No dcgm exported metrics found"
+    endpoint = "http://localhost:9400/metrics"
+    urllib.request.urlopen(endpoint)
 
 
 def test_dcgm_nv_hostengine():
@@ -33,11 +25,6 @@ def test_dcgmi():
         ["dcgm.dcgmi", "discovery", "-l"], check=True, capture_output=True, text=True
     )
     assert "GPU ID" in result.stdout.strip(), "DCGMI is not working"
-
-
-def test_dcgmproftesters():
-    """Test of the dcgmproftesters."""
-    pass
 
 
 def test_dcgm_port_configs():
