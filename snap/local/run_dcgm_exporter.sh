@@ -5,10 +5,10 @@ set -euo pipefail
 args=()
 
 # Add the dcgm-exporter-port option if it is set. Default: “:9400”
-dcgm_exporter_listen="$(snapctl get dcgm-exporter-listen)"
+dcgm_exporter_address="$(snapctl get dcgm-exporter-address)"
 
-if [ -n "$dcgm_exporter_listen" ]; then
-    args+=("-a" "$dcgm_exporter_listen")
+if [ -n "$dcgm_exporter_address" ]; then
+    args+=("-a" "$dcgm_exporter_address")
 fi
 
 exec "$SNAP/bin/dcgm-exporter" "${args[@]}"

@@ -29,7 +29,9 @@ def test_dcgm_nv_hostengine():
 
 def test_dcgmi():
     """Test of the dcgmi command."""
-    result = subprocess.run(["dcgm.dcgmi", "discovery", "-l"], check=True, capture_output=True, text=True)
+    result = subprocess.run(
+        ["dcgm.dcgmi", "discovery", "-l"], check=True, capture_output=True, text=True
+    )
     assert "GPU ID" in result.stdout.strip(), "DCGMI is not working"
 
 
@@ -41,7 +43,7 @@ def test_dcgmproftesters():
 def test_dcgm_port_configs():
     """Test snap port configuratin."""
     services = ["dcgm.dcgm-exporter", "dcgm.nv-hostengine"]
-    configs = ["dcgm-exporter-listen", "nv-hostengine-port"]
+    configs = ["dcgm-exporter-address", "nv-hostengine-port"]
     new_values = [":9466", "5666"]
 
     result = subprocess.run(

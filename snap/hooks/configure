@@ -7,6 +7,6 @@ if [ -z "$(snapctl get nv-hostengine-port)" ]; then
     snapctl set nv-hostengine-port=""
 fi
 
-if [ -z "$(snapctl get dcgm-exporter-listen)" ]; then
-    snapctl set dcgm-exporter-listen=""
+if [ -z "$(snapctl get dcgm-exporter-address)" ]; then
+    snapctl set dcgm-exporter-address=""
 fi
