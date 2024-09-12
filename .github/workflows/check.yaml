@@ -55,9 +55,17 @@ jobs:
       - build
     runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
+
       - name: Install dependencies
-        run: |
-          pipx install tox
+        run: pipx install tox
+
+      - name: Download snap package(s)
+        uses: actions/download-artifact@v4
+        with:
+          pattern: ${{ needs.build.outputs.artifact-prefix }}-*
+          merge-multiple: true
+
       - name: Run tests
         run: tox -e func
