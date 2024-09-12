@@ -31,10 +31,13 @@ jobs:
         run: |
           sudo apt update
           sudo apt install -y yamllint
+          pipx install tox
 
       - name: Lint yaml files
-        run: |
-          yamllint .yamllint snap/snapcraft.yaml
+        run: yamllint .yamllint snap/snapcraft.yaml
+
+      - name: Lint tests
+        run: tox -e lint
 
   build:
     runs-on: ubuntu-22.04
@@ -45,3 +48,15 @@ jobs:
 
       - name: Verify snap builds successfully
         uses: snapcore/action-build@v1
+
+  func:
+    needs:
+      - lint
+      - build
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install dependencies
+
+      - name: Run tests
+        run: tox -e func
