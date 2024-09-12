@@ -60,7 +60,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: SNAP_FILE
-          path: dcgm.snap
+          path: dcgm*.snap
 
   func:
     needs:
@@ -83,4 +83,4 @@ jobs:
         run: pipx install tox
 
       - name: Run tests
-        run: TEST_SNAP=$GITHUB_WORKSPACE/dcgm.snap tox -e func
+        run: tox -e func
