@@ -40,15 +40,15 @@ def test_dcgmproftesters():
 
 def test_dcgm_port_configs():
     """Test snap port configuratin."""
-    services = ["snap.dcgm.dcgm-exporter.service", "snap.dcgm.nv-hostengine.service"]
+    services = ["dcgm.dcgm-exporter", "dcgm.nv-hostengine"]
     configs = ["dcgm-exporter-listen", "nv-hostengine-port"]
     new_values = [":9466", "5666"]
 
     result = subprocess.run(
         ["sudo", "snap", "get", "dcgm", "-d"], check=True, capture_output=True, text=True
     )
-    pairs = json.loads(result.stdout.strip())
-    assert all(config in pairs for config in configs), "Missing snap configuration keys"
+    dcgm_snap_config = json.loads(result.stdout.strip())
+    assert all(config in dcgm_snap_config for config in configs), "Missing snap configuration keys"
 
     for config, new_value in zip(configs, new_values):
         assert 0 == subprocess.call(
@@ -57,7 +57,7 @@ def test_dcgm_port_configs():
 
     # restart the service to apply the new configuration
     for service in services:
-        subprocess.run(["sudo", "systemctl", "restart", service])
+        subprocess.run(["sudo", "snap", "restart", service])
 
     for service, port in zip(services, new_values):
         assert 0 == subprocess.call(

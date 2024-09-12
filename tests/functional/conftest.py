@@ -15,7 +15,7 @@ def install_dcgm_snap():
         0 == subprocess.run(["sudo", "snap", "install", "--dangerous", snap]).returncode
     ), f"Failed to install {snap}"
 
-    subprocess.run(["sudo", "systemctl", "enable", "--now", dcgm_exporter_service])
+    subprocess.run(["sudo", "snap", "start", "dcgm.dcgm-exporter"])
 
     dcgm_exporter_is_active = (
         lambda: subprocess.call(
