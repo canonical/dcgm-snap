@@ -5,10 +5,10 @@
 # `sudo snap get dcgm`.
 if [ -z "$(snapctl get nv-hostengine-port)" ]; then
     # Setting to empty string for the nv-hostengine binary to use the default port. (5555)
-    snapctl set nv-hostengine-port=""
+    snapctl set nv-hostengine-port="5555"
 fi
 
 if [ -z "$(snapctl get dcgm-exporter-address)" ]; then
     # Setting to empty string for the dcgm-exporter binary to use the default address. (:9400)
-    snapctl set dcgm-exporter-address=""
+    snapctl set dcgm-exporter-address=":9400"
 fi

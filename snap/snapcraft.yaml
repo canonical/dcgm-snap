@@ -26,6 +26,8 @@ apps:
       - network-bind
       - opengl
     daemon: simple
+    # As this is a dcgm snap, not the dcgm-exporter snap,
+    # user might not be interested in running dcgm-exporter, so disable it by default
     install-mode: disable
     restart-condition: on-failure
   dcgmi:
