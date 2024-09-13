@@ -1,23 +1,20 @@
 import subprocess
 
 import pytest
-import yaml
 
 
 @pytest.fixture(scope="session", autouse=True)
 def install_dcgm_snap():
     """Install the snap and enable dcgm-exporter service for testing."""
-    with open("snap/snapcraft.yaml") as f:
-        snapcraft = yaml.safe_load(f)
-        snap_build_name = f"{snapcraft['name']}_*.snap"
+    snap_build_name = "dcgm_*.snap"
 
-        subprocess.run(
-            f"sudo snap install --devmode {snap_build_name}",
-            check=True,
-            capture_output=True,
-            shell=True,
-        )
+    subprocess.run(
+        f"sudo snap install --dangerous {snap_build_name}",
+        check=True,
+        capture_output=True,
+        shell=True,
+    )
 
-        yield
+    yield
 
-        subprocess.run("sudo snap remove --purge dcgm".split(), check=True)
+    subprocess.run("sudo snap remove --purge dcgm".split(), check=True)

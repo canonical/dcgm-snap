@@ -22,6 +22,7 @@ def test_dcgm_exporter():
     )
     assert " active" in result.stdout.strip(), "dcgm-exporter service is not active"
 
+    # Check the exporter endpoint, will raise an exception if the endpoint is not reachable
     urllib.request.urlopen(endpoint)
 
 
