@@ -39,12 +39,6 @@ apps:
     restart-condition: on-abort
     environment:
       DCGM_HOME_DIR: "${SNAP_COMMON}"
-  dcgmproftester10:
-    command: usr/bin/dcgmproftester10
-  dcgmproftester11:
-    command: usr/bin/dcgmproftester11
-  dcgmproftester12:
-    command: usr/bin/dcgmproftester12
 
 parts:
   wrapper:
