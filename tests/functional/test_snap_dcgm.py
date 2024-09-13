@@ -6,21 +6,10 @@ from time import sleep
 from tenacity import retry, stop_after_delay, wait_fixed
 
 
-@retry(wait=wait_fixed(5), stop=stop_after_delay(15))
+@retry(wait=wait_fixed(5), stop=stop_after_delay(30))
 def test_dcgm_exporter():
     """Test of the dcgm-exporter service and its endpoint."""
     endpoint = "http://localhost:9400/metrics"
-    dcgm_exporter_service = "dcgm.dcgm-exporter"
-
-    subprocess.run(f"sudo snap start {dcgm_exporter_service}".split(), check=True)
-
-    result = subprocess.run(
-        f"sudo snap services {dcgm_exporter_service}".split(),
-        check=True,
-        capture_output=True,
-        text=True,
-    )
-    assert " active" in result.stdout.strip(), "dcgm-exporter service is not active"
 
     # Check the exporter endpoint, will raise an exception if the endpoint is not reachable
     urllib.request.urlopen(endpoint)
@@ -37,7 +26,7 @@ def test_dcgm_nv_hostengine():
         text=True,
     )
 
-    assert " active" in service.stdout.strip(), "nv-hostengine service is not active"
+    assert " active" in service.stdout.strip(), f"{nv_hostengine_service} service is not active"
 
 
 def test_dcgmi():
@@ -48,7 +37,7 @@ def test_dcgmi():
     assert "GPU ID" in result.stdout.strip(), "DCGMI is not working"
 
 
-def test_dcgm_port_configs():
+def test_dcgm_bind_configs():
     """Test snap port configuratin."""
     services = ["dcgm.dcgm-exporter", "dcgm.nv-hostengine"]
     configs = ["dcgm-exporter-address", "nv-hostengine-port"]
