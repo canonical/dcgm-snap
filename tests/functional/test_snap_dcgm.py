@@ -49,13 +49,13 @@ def test_dcgmi():
     assert "GPU ID" in result.stdout.strip(), "DCGMI didn't produce the expected table"
 
 
-bind_test_data = [
-    ("dcgm.dcgm-exporter", "dcgm-exporter-address", ":9466"),
-    ("dcgm.nv-hostengine", "nv-hostengine-port", "5566"),
-]
-
-
-@pytest.mark.parametrize("service, config, new_value", bind_test_data)
+@pytest.mark.parametrize(
+    "service, config, new_value",
+    [
+        ("dcgm.dcgm-exporter", "dcgm-exporter-address", ":9466"),
+        ("dcgm.nv-hostengine", "nv-hostengine-port", "5566"),
+    ],
+)
 def test_dcgm_bind_config(service: str, config: str, new_value: str):
     """Test snap bind configuration."""
     result = subprocess.run(
@@ -63,16 +63,24 @@ def test_dcgm_bind_config(service: str, config: str, new_value: str):
     )
     dcgm_snap_config = json.loads(result.stdout.strip())
     assert config in dcgm_snap_config, f"{config} is not in the snap configuration"
+    old_value = dcgm_snap_config[config]
 
-    assert 0 == subprocess.call(
-        f"sudo snap set dcgm {config}={new_value}".split()
-    ), f"Failed to set {config} to {new_value}"
+    def set_config_and_check(value: str):
+        assert 0 == subprocess.call(
+            f"sudo snap set dcgm {config}={value}".split()
+        ), f"Failed to set {config} to {new_value}"
 
-    # restart the service to apply the new configuration
-    subprocess.run(f"sudo snap restart {service}".split(), check=True)
+        # restart the service to apply the configuration
+        subprocess.run(f"sudo snap restart {service}".split(), check=True)
 
-    for attempt in Retrying(wait=wait_fixed(2), stop=stop_after_delay(10)):
-        with attempt:
-            assert 0 == subprocess.call(
-                f"nc -z localhost {new_value.lstrip(':')}".split()
-            ), f"{service} is not listening on {new_value}"
+        for attempt in Retrying(wait=wait_fixed(2), stop=stop_after_delay(10)):
+            with attempt:
+                assert 0 == subprocess.call(
+                    f"nc -z localhost {value.lstrip(':')}".split()
+                ), f"{service} is not listening on {value}"
+
+    # Check new config
+    set_config_and_check(new_value)
+
+    # Revert back
+    set_config_and_check(str(old_value))
