@@ -21,7 +21,7 @@ title: NVIDIA DCGM
 
 apps:
   dcgm-exporter:
-    command: run_dcgm_exporter.sh
+    command: bin/run_dcgm_exporter.sh
     plugs:
       - network-bind
       - opengl
@@ -94,14 +94,14 @@ parts:
       craftctl default
       mkdir -p $SNAPCRAFT_PART_INSTALL/etc/dcgm-exporter
       cp etc/default-counters.csv etc/dcp-metrics-included.csv $SNAPCRAFT_PART_INSTALL/etc/dcgm-exporter/
-      chmod +x run_dcgm_exporter.sh
 
-  # nv-hostengine wrapper supporting snap options
+  # wrappers supporting snap options
   wrapper:
     plugin: dump
     source: snap/local/files
     organize:
       run_nv_hostengine.sh: bin/
+      run_dcgm_exporter.sh: bin/
 
 layout:
   /etc/dcgm-exporter:
