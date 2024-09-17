@@ -133,6 +133,6 @@ class TestDCGMConfigs:
 
         # Revet back
         self.set_config(service, config)
-        self.check_metric_config("/etc/dcgm-exporter/default-counters.csv")
+        self.check_metric_config("default-counters.csv")
 
         subprocess.check_call(f"sudo rm {metric_file_path}".split())
