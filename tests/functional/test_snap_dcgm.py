@@ -126,6 +126,7 @@ class TestDCGMConfigs:
 
         self.get_config(config)
 
+        # $SNAP_COMMON requires root permissions to create a file
         subprocess.check_call(f"sudo touch {metric_file_path}".split())
 
         self.set_config(service, config, metric_file)

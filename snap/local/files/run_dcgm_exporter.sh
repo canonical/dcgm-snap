@@ -14,7 +14,7 @@ if [ -n "$dcgm_exporter_address" ]; then
     args+=("-a" "$dcgm_exporter_address")
 fi
 
-# File should be available in the snap data directory under $SNAP_COMMON/etc/dcgm-exporter
+# File should be available in the snap data directory under $SNAP_COMMON
 if [[ -n "$dcgm_exporter_metrics_file" && -f "$dcgm_exporter_metrics_file_path" ]]; then
     args+=("-f" "$dcgm_exporter_metrics_file_path")
 fi
