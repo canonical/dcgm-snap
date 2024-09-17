@@ -81,6 +81,7 @@ class TestDCGMConfigs:
         return str(dcgm_snap_config[config])
 
     @classmethod
+    @retry(wait=wait_fixed(2), stop=stop_after_delay(10))
     def check_metric_config(cls, metric_file: str) -> None:
         dcgm_exporter_service = "snap.dcgm.dcgm-exporter"
 
@@ -125,14 +126,7 @@ class TestDCGMConfigs:
 
         self.check_config_exists(config)
 
-        with open(metric_file_path, "w") as f:
-            print(f"Wrote test metrics to {metric_file_path}")
-            f.writelines(
-                [
-                    "# VGPU License status",
-                    "DCGM_FI_DEV_VGPU_LICENSE_STATUS, gauge, vGPU License status",
-                ]
-            )
+        subprocess.check_call(f"sudo touch {metric_file_path}".split())
 
         self.set_config(service, config, metric_file)
         self.check_metric_config(metric_file_path)
@@ -141,5 +135,4 @@ class TestDCGMConfigs:
         self.set_config(service, config)
         self.check_metric_config("/etc/dcgm-exporter/default-counters.csv")
 
-        if os.path.exists(metric_file_path):
-            os.remove(metric_file_path)
+        subprocess.check_call(f"sudo rm {metric_file_path}".split())

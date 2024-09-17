@@ -90,4 +90,4 @@ jobs:
           python -m pip install 'tox<5'
 
       - name: Run unit tests
-        run: sudo tox -e func
+        run: tox -e func
