@@ -1,5 +1,0 @@
-#!/bin/sh -e
-
-# Create a folder for custom metric file in $SNAP_COMMON
-# for a user to supply custom metrics file
-mkdir -p $SNAP_COMMON/etc/dcgm-exporter

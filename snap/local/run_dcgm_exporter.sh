@@ -8,7 +8,7 @@ args=()
 dcgm_exporter_address="$(snapctl get dcgm-exporter-address)"
 # Add the dcgm-exporter-metrics-file option if it is set.
 dcgm_exporter_metrics_file="$(snapctl get dcgm-exporter-metrics-file)"
-dcgm_exporter_metrics_file_path="$SNAP_COMMON/etc/dcgm-exporter/$dcgm_exporter_metrics_file"
+dcgm_exporter_metrics_file_path="$SNAP_COMMON/$dcgm_exporter_metrics_file"
 
 if [ -n "$dcgm_exporter_address" ]; then
     args+=("-a" "$dcgm_exporter_address")
