@@ -70,7 +70,7 @@ class TestDCGMConfigs:
                 ), f"{service} is not listening on {bind}"
 
     @classmethod
-    def check_config_exists(cls, config: str) -> str:
+    def get_config(cls, config: str) -> str:
         """Check if a configuration exists in the snap configuration.
 
         :return: The value of the current configuration
@@ -109,7 +109,7 @@ class TestDCGMConfigs:
     )
     def test_dcgm_bind_config(self, service: str, config: str, new_value: str) -> None:
         """Test snap bind configuration."""
-        old_value = self.check_config_exists(config)
+        old_value = self.get_config(config)
 
         self.set_config(service, config, new_value)
         self.check_bind_config(service, new_value)
@@ -124,7 +124,7 @@ class TestDCGMConfigs:
         metric_file = "test-metrics.csv"
         metric_file_path = os.path.join(os.getenv("SNAP_COMMON"), metric_file)
 
-        self.check_config_exists(config)
+        self.get_config(config)
 
         subprocess.check_call(f"sudo touch {metric_file_path}".split())
 
