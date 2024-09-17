@@ -10,6 +10,9 @@ platforms:
   amd64:
     build-on: [amd64]
     build-for: [amd64]
+  arm64:
+    build-on: [arm64]
+    build-for: [arm64]
 grade: stable
 confinement: strict
 source-code: https://github.com/canonical/dcgm-snap
@@ -18,10 +21,15 @@ title: NVIDIA DCGM
 
 apps:
   dcgm-exporter:
-    command: bin/dcgm-exporter
+    command: run_dcgm_exporter.sh
     plugs:
       - network-bind
       - opengl
+    daemon: simple
+    # As this is a dcgm snap, not the dcgm-exporter snap,
+    # user might not be interested in running dcgm-exporter, so disable it by default
+    install-mode: disable
+    restart-condition: on-failure
   dcgmi:
     command: usr/bin/dcgmi
     plugs:
@@ -86,6 +94,7 @@ parts:
       craftctl default
       mkdir -p $SNAPCRAFT_PART_INSTALL/etc/dcgm-exporter
       cp etc/default-counters.csv etc/dcp-metrics-included.csv $SNAPCRAFT_PART_INSTALL/etc/dcgm-exporter/
+      chmod +x run_dcgm_exporter.sh
 
   # nv-hostengine wrapper supporting snap options
   wrapper:
