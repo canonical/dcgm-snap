@@ -12,6 +12,7 @@ if [ -n "$nv_hostengine_port" ]; then
 fi
 
 # Check if dcgm-exporter service is running and restart it
+# systemctl will not work in strict confinement
 dcgm_exporter_status=$(snapctl services dcgm.dcgm-exporter | awk '/dcgm\.dcgm-exporter/ {print $3}')
 if [ "$dcgm_exporter_status" == "active" ]; then
     snapctl restart dcgm.dcgm-exporter
