@@ -113,7 +113,7 @@ class TestDCGMConfigs:
         :param metric_file: The metric file to check for, if empty check if nothing is loaded
         """
         result = subprocess.check_output(
-            "ps -eo cmd | grep [d]cgm-exporter", shell=True, text=True
+            "ps -eo cmd | grep '/bin/[d]cgm-exporter'", shell=True, text=True
         )
 
         if metric_file:
