@@ -4,37 +4,63 @@ import subprocess
 import urllib.request
 
 import pytest
-from tenacity import Retrying, retry, stop_after_delay, wait_fixed
+from tenacity import retry, stop_after_delay, wait_fixed
+
+
+@retry(wait=wait_fixed(2), stop=stop_after_delay(10))
+def _check_service_active(service: str) -> None:
+    """Check if a service is active."""
+    assert 0 == subprocess.call(
+        f"sudo systemctl is-active --quiet {service}".split()
+    ), f"{service} is not running"
+
+
+@retry(wait=wait_fixed(2), stop=stop_after_delay(10))
+def _check_service_failed(service: str) -> None:
+    """Check if a service is in a failed state."""
+    assert 0 == subprocess.call(
+        f"sudo systemctl is-failed --quiet {service}".split()
+    ), f"{service} is running"
+
+
+@retry(wait=wait_fixed(5), stop=stop_after_delay(30))
+def _check_endpoint(endpoint: str, reachable: bool = True) -> None:
+    """Check if an endpoint is reachable.
+    
+    :param endpoint: The endpoint to check
+    :param reachable: If the endpoint should be reachable or not
+    """
+    try:
+        response = urllib.request.urlopen(endpoint)
+        status_code = response.getcode()
+        if reachable:
+            assert status_code == 200, f"Endpoint {endpoint} returned {status_code}"
+        else:
+            raise AssertionError(f"Endpoint {endpoint} is reachable but should not be")
+    except Exception:
+        if reachable:
+            raise AssertionError(f"Endpoint {endpoint} is not reachable")
+        else:
+            pass
 
 
 class TestDCGMComponents:
-    @classmethod
-    def check_service_active(cls, service: str):
-        assert 0 == subprocess.call(
-            f"sudo systemctl is-active --quiet {service}".split()
-        ), f"{service} is not running"
-
-    @retry(wait=wait_fixed(5), stop=stop_after_delay(30))
     def test_dcgm_exporter(self) -> None:
         """Test of the dcgm-exporter service and its endpoint."""
         dcgm_exporter_service = "snap.dcgm.dcgm-exporter"
         endpoint = "http://localhost:9400/metrics"
 
-        self.check_service_active(dcgm_exporter_service)
-
-        # Will raise an exception if the endpoint is not reachable
-        response = urllib.request.urlopen(endpoint)
-
+        _check_service_active(dcgm_exporter_service)
         # The output of the exporter endpoint is not tested
         # as in a virtual environment it will not have any GPU metrics
-        assert 200 == response.getcode(), "DCGM exporter endpoint returned an error"
+        _check_endpoint(endpoint)
 
     def test_dcgm_nv_hostengine(self) -> None:
         """Check the dcgm-nv-hostengine service."""
         nv_hostengine_service = "snap.dcgm.nv-hostengine"
         nv_hostengine_port = 5555
 
-        self.check_service_active(nv_hostengine_service)
+        _check_service_active(nv_hostengine_service)
 
         assert 0 == subprocess.call(
             f"nc -z localhost {nv_hostengine_port}".split()
@@ -51,23 +77,22 @@ class TestDCGMComponents:
 
 class TestDCGMConfigs:
     @classmethod
+    @retry(wait=wait_fixed(2), stop=stop_after_delay(10))
     def set_config(cls, service: str, config: str, value: str = "") -> None:
         """Set a configuration value for a snap service."""
         assert 0 == subprocess.call(
             f"sudo snap set dcgm {config}={value}".split()
         ), f"Failed to set {config} to {value}"
 
-        # restart the service to apply the configuration
         subprocess.run(f"sudo snap restart {service}".split(), check=True)
 
     @classmethod
+    @retry(wait=wait_fixed(2), stop=stop_after_delay(10))
     def check_bind_config(cls, service: str, bind: str) -> None:
         """Check if a service is listening on a specific bind."""
-        for attempt in Retrying(wait=wait_fixed(2), stop=stop_after_delay(10)):
-            with attempt:
-                assert 0 == subprocess.call(
-                    f"nc -z localhost {bind.lstrip(':')}".split()
-                ), f"{service} is not listening on {bind}"
+        assert 0 == subprocess.call(
+            f"nc -z localhost {bind.lstrip(':')}".split()
+        ), f"{service} is not listening on {bind}"
 
     @classmethod
     def get_config(cls, config: str) -> str:
@@ -82,23 +107,19 @@ class TestDCGMConfigs:
 
     @classmethod
     @retry(wait=wait_fixed(2), stop=stop_after_delay(10))
-    def check_metric_config(cls, metric_file: str) -> None:
-        dcgm_exporter_service = "snap.dcgm.dcgm-exporter"
-
+    def check_metric_config(cls, metric_file: str = "") -> None:
+        """Check if the metric file is loaded in the dcgm-exporter service.
+        
+        :param metric_file: The metric file to check for, if empty the function will check if no metric file is loaded
+        """
         result = subprocess.check_output(
-            f"sudo systemctl show -p ActiveEnterTimestamp {dcgm_exporter_service}".split(),
-            text=True,
+            "ps -eo cmd | grep 'dcgm-exporter'", shell=True, text=True
         )
 
-        start_timestamp = result.strip().split("=")[1]
-
-        result = subprocess.check_output(
-            f"sudo journalctl -u {dcgm_exporter_service} --since '{start_timestamp}'",
-            shell=True,
-            text=True,
-        )
-
-        assert metric_file in result, f"Metric file {metric_file} is not loaded"
+        if metric_file:
+            assert f"-f {metric_file}" in result, f"Metric file {metric_file} is not loaded"
+        else:
+            assert " -f " not in result, "Metric file is loaded, but should not be"
 
     @pytest.mark.parametrize(
         "service, config, new_value",
@@ -111,29 +132,59 @@ class TestDCGMConfigs:
         """Test snap bind configuration."""
         old_value = self.get_config(config)
 
+        # Valid config
         self.set_config(service, config, new_value)
         self.check_bind_config(service, new_value)
+
+        # Invalid config
+        self.set_config(service, config, "test")
+        _check_service_failed(f"snap.{service}")
 
         # Revert back
         self.set_config(service, config, old_value)
         self.check_bind_config(service, old_value)
 
     def test_dcgm_metric_config(self) -> None:
+        """Test the metric file configuration of the dcgm-exporter service."""
         service = "dcgm.dcgm-exporter"
         config = "dcgm-exporter-metrics-file"
         metric_file = "test-metrics.csv"
-        metric_file_path = os.path.join(os.getenv("SNAP_COMMON"), metric_file)
+        endpoint = "http://localhost:9400/metrics"
+        metric_file_path = os.path.join("/var/snap/dcgm/common", metric_file)
 
         self.get_config(config)
 
         # $SNAP_COMMON requires root permissions to create a file
         subprocess.check_call(f"sudo touch {metric_file_path}".split())
 
+        # Empty metric
+        self.set_config(service, config, metric_file)
+        self.check_metric_config()
+        _check_endpoint(endpoint, reachable=True)
+
+        # Non-existing metric
+        self.set_config(service, config, "unknown.csv")
+        self.check_metric_config()
+        _check_endpoint(endpoint, reachable=True)
+
+        # Invalid metric
+        subprocess.check_call(f"echo 'test' | sudo tee {metric_file_path}", shell=True)
         self.set_config(service, config, metric_file)
         self.check_metric_config(metric_file_path)
+        _check_endpoint(endpoint, reachable=False)
 
-        # Revet back
+        # Valid metric
+        subprocess.check_call(
+            f"echo 'DCGM_FI_DRIVER_VERSION, label, Driver Version' | sudo tee {metric_file_path}",
+            shell=True,
+        )
+        self.set_config(service, config, metric_file)
+        self.check_metric_config(metric_file_path)
+        _check_endpoint(endpoint, reachable=True)
+
+        # Revert back
         self.set_config(service, config)
-        self.check_metric_config("default-counters.csv")
+        self.check_metric_config()
+        _check_endpoint(endpoint, reachable=True)
 
         subprocess.check_call(f"sudo rm {metric_file_path}".split())
