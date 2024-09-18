@@ -142,6 +142,7 @@ class TestDCGMConfigs:
         self.get_config(config)
 
         # $SNAP_COMMON requires root permissions to create a file
+        # Will be removed during the test cleanup by the fixture
         subprocess.check_call(f"sudo touch {metric_file_path}".split())
 
         # Empty metric
@@ -172,5 +173,3 @@ class TestDCGMConfigs:
         # Revert back
         self.set_config(service, config)
         self.check_metric_config()
-
-        subprocess.check_call(f"sudo rm {metric_file_path}".split())

@@ -16,6 +16,8 @@ fi
 # File should be available in the snap data directory under $SNAP_COMMON
 if [[ -f "$dcgm_exporter_metrics_file_path" && -s "$dcgm_exporter_metrics_file_path" ]]; then
     args+=("-f" "$dcgm_exporter_metrics_file_path")
+else
+    echo "Error: DCGM exporter metrics file not found or empty: $dcgm_exporter_metrics_file_path"
 fi
 
 exec "$SNAP/bin/dcgm-exporter" "${args[@]}"
