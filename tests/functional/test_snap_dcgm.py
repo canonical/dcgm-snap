@@ -24,24 +24,11 @@ def _check_service_failed(service: str) -> None:
 
 
 @retry(wait=wait_fixed(5), stop=stop_after_delay(30))
-def _check_endpoint(endpoint: str, reachable: bool = True) -> None:
-    """Check if an endpoint is reachable.
-
-    :param endpoint: The endpoint to check
-    :param reachable: If the endpoint should be reachable or not
-    """
-    try:
-        response = urllib.request.urlopen(endpoint)
-        status_code = response.getcode()
-        if reachable:
-            assert status_code == 200, f"Endpoint {endpoint} returned {status_code}"
-        else:
-            raise AssertionError(f"Endpoint {endpoint} is reachable but should not be")
-    except Exception:
-        if reachable:
-            raise AssertionError(f"Endpoint {endpoint} is not reachable")
-        else:
-            pass
+def _check_endpoint(endpoint: str) -> None:
+    """Check if an endpoint is reachable."""
+    response = urllib.request.urlopen(endpoint)  # will raise if not reachable
+    status_code = response.getcode()
+    assert status_code == 200, f"Endpoint {endpoint} returned status code {status_code}"
 
 
 class TestDCGMComponents:
@@ -160,12 +147,12 @@ class TestDCGMConfigs:
         # Empty metric
         self.set_config(service, config, metric_file)
         self.check_metric_config()
-        _check_endpoint(endpoint, reachable=True)
+        _check_endpoint(endpoint)
 
         # Non-existing metric
         self.set_config(service, config, "unknown.csv")
         self.check_metric_config()
-        _check_endpoint(endpoint, reachable=True)
+        _check_endpoint(endpoint)
 
         # Invalid metric
         subprocess.check_call(f"echo 'test' | sudo tee {metric_file_path}", shell=True)
@@ -180,7 +167,7 @@ class TestDCGMConfigs:
         )
         self.set_config(service, config, metric_file)
         self.check_metric_config(metric_file_path)
-        _check_endpoint(endpoint, reachable=True)
+        _check_endpoint(endpoint)
 
         # Revert back
         self.set_config(service, config)
