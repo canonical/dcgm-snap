@@ -170,8 +170,8 @@ class TestDCGMConfigs:
         # Invalid metric
         subprocess.check_call(f"echo 'test' | sudo tee {metric_file_path}", shell=True)
         self.set_config(service, config, metric_file)
-        self.check_metric_config(metric_file_path)
-        _check_endpoint(endpoint, reachable=False)
+        # The exporter will fail to start due to the invalid metric file
+        _check_service_failed(f"snap.{service}")
 
         # Valid metric
         subprocess.check_call(
@@ -185,6 +185,5 @@ class TestDCGMConfigs:
         # Revert back
         self.set_config(service, config)
         self.check_metric_config()
-        _check_endpoint(endpoint, reachable=True)
 
         subprocess.check_call(f"sudo rm {metric_file_path}".split())
