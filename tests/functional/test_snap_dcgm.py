@@ -26,7 +26,7 @@ def _check_service_failed(service: str) -> None:
 @retry(wait=wait_fixed(5), stop=stop_after_delay(30))
 def _check_endpoint(endpoint: str, reachable: bool = True) -> None:
     """Check if an endpoint is reachable.
-    
+
     :param endpoint: The endpoint to check
     :param reachable: If the endpoint should be reachable or not
     """
@@ -109,8 +109,8 @@ class TestDCGMConfigs:
     @retry(wait=wait_fixed(2), stop=stop_after_delay(10))
     def check_metric_config(cls, metric_file: str = "") -> None:
         """Check if the metric file is loaded in the dcgm-exporter service.
-        
-        :param metric_file: The metric file to check for, if empty the function will check if no metric file is loaded
+
+        :param metric_file: The metric file to check for, if empty check if nothing is loaded
         """
         result = subprocess.check_output(
             "ps -eo cmd | grep 'dcgm-exporter'", shell=True, text=True
