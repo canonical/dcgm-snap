@@ -2,6 +2,7 @@ import json
 import os
 import subprocess
 import urllib.request
+from contextlib import contextmanager
 
 import pytest
 from tenacity import retry, stop_after_delay, wait_fixed
@@ -108,6 +109,18 @@ class TestDCGMConfigs:
         else:
             assert "-f" not in result.split(), "Metric file is loaded, but should not be"
 
+    @contextmanager
+    def bind_config(self, service, config, new_value):
+        """Set up a context manager to test snap bind configuration."""
+        old_value = self.get_config(config)
+        try:
+            self.set_config(service, config, new_value)
+            yield
+        finally:
+            # Revert back
+            self.set_config(service, config, old_value)
+            self.check_bind_config(service, old_value)
+
     @pytest.mark.parametrize(
         "service, config, new_value",
         [
@@ -115,61 +128,92 @@ class TestDCGMConfigs:
             ("dcgm.nv-hostengine", "nv-hostengine-port", "5566"),
         ],
     )
-    def test_dcgm_bind_config(self, service: str, config: str, new_value: str) -> None:
-        """Test snap bind configuration."""
-        old_value = self.get_config(config)
+    def test_valid_bind_config(self, service: str, config: str, new_value: str) -> None:
+        """Test valid snap bind configuration."""
+        with self.bind_config(service, config, new_value):
+            self.check_bind_config(service, new_value)
 
-        # Valid config
-        self.set_config(service, config, new_value)
-        self.check_bind_config(service, new_value)
+    @pytest.mark.parametrize(
+        "service, config, new_value",
+        [
+            ("dcgm.dcgm-exporter", "dcgm-exporter-address", "test"),
+            ("dcgm.nv-hostengine", "nv-hostengine-port", "test"),
+        ],
+    )
+    def test_invalid_bind_config(self, service: str, config: str, new_value: str) -> None:
+        """Test invalid snap bind configuration."""
+        with self.bind_config(service, config, new_value):
+            _check_service_failed(f"snap.{service}")
 
-        # Invalid config
-        self.set_config(service, config, "test")
-        _check_service_failed(f"snap.{service}")
+    @classmethod
+    @pytest.fixture
+    def metric_setup(cls):
+        """Fixture for metric configuration tests."""
+        cls.service = "dcgm.dcgm-exporter"
+        cls.config = "dcgm-exporter-metrics-file"
+        cls.endpoint = "http://localhost:9400/metrics"
+        cls.snap_common = "/var/snap/dcgm/common"
+
+        cls.get_config(cls.config)
+
+        yield
 
         # Revert back
-        self.set_config(service, config, old_value)
-        self.check_bind_config(service, old_value)
+        cls.set_config(cls.service, cls.config)
+        cls.check_metric_config()
 
-    def test_dcgm_metric_config(self) -> None:
-        """Test the metric file configuration of the dcgm-exporter service."""
-        service = "dcgm.dcgm-exporter"
-        config = "dcgm-exporter-metrics-file"
-        metric_file = "test-metrics.csv"
-        endpoint = "http://localhost:9400/metrics"
-        metric_file_path = os.path.join("/var/snap/dcgm/common", metric_file)
+    @pytest.mark.usefixtures("metric_setup")
+    def test_empty_metric(self) -> None:
+        """Test with an empty metric file.
 
-        self.get_config(config)
-
+        Empty files will not be passed to the exporter
+        """
+        metric_file = "empty-metrics.csv"
+        metric_file_path = os.path.join(self.snap_common, metric_file)
         # $SNAP_COMMON requires root permissions to create a file
-        # Will be removed during the test cleanup by the fixture
         subprocess.check_call(f"sudo touch {metric_file_path}".split())
 
-        # Empty metric
-        self.set_config(service, config, metric_file)
+        self.set_config(self.service, self.config, metric_file)
         self.check_metric_config()
-        _check_endpoint(endpoint)
+        _check_endpoint(self.endpoint)
 
-        # Non-existing metric
-        self.set_config(service, config, "unknown.csv")
+    @pytest.mark.usefixtures("metric_setup")
+    def test_non_existing_metric(self) -> None:
+        """Test with a non-existing metric file.
+
+        Non-existing files will not be passed to the exporter.
+        """
+        self.set_config(self.service, self.config, "unknown.csv")
         self.check_metric_config()
-        _check_endpoint(endpoint)
+        _check_endpoint(self.endpoint)
 
-        # Invalid metric
+    @pytest.mark.usefixtures("metric_setup")
+    def test_invalid_metric(self) -> None:
+        """Test with an invalid metric file.
+
+        The exporter will fail to start due to the invalid metric file
+        """
+        metric_file = "empty-metrics.csv"
+        metric_file_path = os.path.join(self.snap_common, metric_file)
+        # $SNAP_COMMON requires root permissions to create a file
         subprocess.check_call(f"echo 'test' | sudo tee {metric_file_path}", shell=True)
-        self.set_config(service, config, metric_file)
-        # The exporter will fail to start due to the invalid metric file
-        _check_service_failed(f"snap.{service}")
 
-        # Valid metric
+        self.set_config(self.service, self.config, metric_file)
+        _check_service_failed(f"snap.{self.service}")
+
+    @pytest.mark.usefixtures("metric_setup")
+    def test_valid_metric(self) -> None:
+        """Test with a valid metric file.
+
+        The endpoint is reachable with the specified metrics
+        """
+        metric_file = "valid-metrics.csv"
+        metric_file_path = os.path.join(self.snap_common, metric_file)
         subprocess.check_call(
             f"echo 'DCGM_FI_DRIVER_VERSION, label, Driver Version' | sudo tee {metric_file_path}",
             shell=True,
         )
-        self.set_config(service, config, metric_file)
-        self.check_metric_config(metric_file_path)
-        _check_endpoint(endpoint)
 
-        # Revert back
-        self.set_config(service, config)
-        self.check_metric_config()
+        self.set_config(self.service, self.config, metric_file)
+        self.check_metric_config(metric_file_path)
+        _check_endpoint(self.endpoint)
