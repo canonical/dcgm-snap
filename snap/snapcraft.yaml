@@ -51,6 +51,11 @@ description: |
     The default is located in `/snap/dcgm/current/etc/dcgm-exporter/default-counters.csv`.
     Please refer to the DCGM-Exporter repository for more information on the CSV file format.
 
+  **Limitations**
+  ---
+  As the DCGM components are packed in the snap, some features and configurations are not available.
+  Please, report a missing feature or configuration.
+
   **Links**
   ---
   Upstream DCGM-Exporter repository for more information
