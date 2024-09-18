@@ -113,13 +113,13 @@ class TestDCGMConfigs:
         :param metric_file: The metric file to check for, if empty check if nothing is loaded
         """
         result = subprocess.check_output(
-            "ps -eo cmd | grep 'dcgm-exporter'", shell=True, text=True
+            "ps -eo cmd | grep [d]cgm-exporter", shell=True, text=True
         )
 
         if metric_file:
             assert f"-f {metric_file}" in result, f"Metric file {metric_file} is not loaded"
         else:
-            assert " -f " not in result, "Metric file is loaded, but should not be"
+            assert "-f" not in result.split(), "Metric file is loaded, but should not be"
 
     @pytest.mark.parametrize(
         "service, config, new_value",
