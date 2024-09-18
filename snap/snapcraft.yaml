@@ -8,7 +8,7 @@ description: |
   This snap includes NVIDIA DCGM and DCGM-exporter to monitor GPU via Prometheus metrics.
   This snap does not include the `dcgmproftester`.
 
-  **Note**: The `DCGM-exporter` service is disabled by default because a user might not be interested 
+  **Note**: The `DCGM-exporter` service is disabled by default because a user might not be interested
   in collecting metrics as this is a dcgm snap, not the DCGM-exporter snap.
 
   **Quick Start**
@@ -42,12 +42,12 @@ description: |
   ```
 
   Available configs:
-  - `nv-hostengine-port`: The port on which the NV-Hostengine listens. 
+  - `nv-hostengine-port`: The port on which the NV-Hostengine listens.
     The default is 5555.
-  - `dcgm-exporter-address`: The bind address which the DCGM exporter exposes for the metrics. 
+  - `dcgm-exporter-address`: The bind address which the DCGM exporter exposes for the metrics.
     The default is :9400.
   - `dcgm-exporter-metrics-file`: The name of the custom CSV metrics file can be provided (only the name, not the path).
-    The file should be placed in the `/var/snap/dcgm/common/` directory. 
+    The file should be placed in the `/var/snap/dcgm/common/` directory.
     The default is located in `/snap/dcgm/current/etc/dcgm-exporter/default-counters.csv`.
     Please refer to the DCGM-Exporter repository for more information on the CSV file format.
 
