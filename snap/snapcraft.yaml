@@ -5,10 +5,15 @@ summary: Snap for NVIDIA DCGM and DCGM exporter
 license: Apache-2.0
 contact: solutions-engineering@lists.canonical.com
 description: |
-  This snap includes NVIDIA DCGM and DCGM-exporter to monitor GPU via Prometheus metrics.
-  This snap does not include the `dcgmproftester`.
+  This snap includes NVIDIA DCGM and DCGM-exporter to monitor GPU via Prometheus metrics
+  A use can setup a Grafana dashboard to visualize the metrics.
 
-  **Note**: The `dcgm-exporter` service is disabled by default because a user might not be interested
+  The snap includes the following components:
+  - DCGM: Data Center GPU Manager
+  - DCGM-exporter: A Prometheus exporter for DCGM metrics
+  - NV-Hostengine: A service that communicates with the NVIDIA GPU driver to get the metrics
+
+  **Note**: The `DCGM-exporter` service is disabled by default because a user might not be interested
   in collecting metrics as this is a DCGM snap, not the DCGM-exporter snap.
 
   **Quick Start**
@@ -55,6 +60,8 @@ description: |
   ---
   As the DCGM components are packed in the snap, some features and configurations are not available.
   Please, report a missing feature or configuration.
+
+  This snap does not include the `dcgmproftester`.
 
   **Links**
   ---
