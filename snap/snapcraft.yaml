@@ -61,7 +61,7 @@ description: |
   As the DCGM components are packed in the snap, some features and configurations are not available.
   Please, report a missing feature or configuration.
 
-  This snap does not include the `dcgmproftester`.
+  This snap does not include the `dcgmproftester`, which is a performance testing tool.
 
   **Links**
   ---
@@ -70,6 +70,9 @@ description: |
 
   Upstream DCGM repository
   https://github.com/NVIDIA/DCGM
+
+  DCGM Documentation
+  https://docs.nvidia.com/datacenter/dcgm/latest/user-guide/index.html
 
   Available NVIDIA GPU metrics
   https://docs.nvidia.com/datacenter/dcgm/latest/dcgm-api/dcgm-api-field-ids.html
