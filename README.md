@@ -19,4 +19,4 @@ You can test the snap locally by using the command:
 tox -e func
 ```
 
-User documentation can be found in the [snap documentation](https://snapcraft.io/dcgm).
+User documentation can be found on the [snap page](https://snapcraft.io/dcgm).
