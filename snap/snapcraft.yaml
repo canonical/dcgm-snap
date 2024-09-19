@@ -6,7 +6,7 @@ license: Apache-2.0
 contact: solutions-engineering@lists.canonical.com
 description: |
   This snap includes NVIDIA DCGM and DCGM-Exporter to manage and monitor NVIDIA GPUs via the CLI or via Prometheus metrics.
-  For instance, th snap can be used to collect the metrics and make Grafana dashboard for data visualition.
+  For instance, the snap can be used to collect the metrics and make Grafana dashboard for data visualization.
 
   The snap includes the following components:
   - DCGM: Data Center GPU Manager
@@ -33,12 +33,13 @@ description: |
   curl localhost:9400/metrics
   ```
 
-  **Note**: The `DCGM-Exporter` service is disabled by default because a user might not be interested
-  in collecting metrics as this is a DCGM snap, not the DCGM-Exporter snap.
+  **Note**: The `DCGM-Exporter` service is disabled by default. If you wish to collect metrics for monitoring,
+  see how to enable the exporter in the section above.
 
   **How to configure the snap services**
 
-  The DCGM snap provides several configuration options through the `snap` CLI. For example:
+  The DCGM snap provides several configuration options that can be customized through the `snap` CLI.
+  For example:
 
   ```
   # Get all the configuration options
@@ -54,7 +55,7 @@ description: |
   **Reference**
   ---
 
-  There are several configurations available:
+  Configurations available:
 
   - `nv-hostengine-port`: The port on which the NV-Hostengine listens.
     The default is `5555`.
