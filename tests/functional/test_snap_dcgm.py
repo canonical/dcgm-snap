@@ -66,11 +66,20 @@ class TestDCGMComponents:
 class TestDCGMConfigs:
     @classmethod
     @retry(wait=wait_fixed(2), stop=stop_after_delay(10))
-    def set_config(cls, service: str, config: str, value: str = "") -> None:
+    def set_config(cls, service: str, config: str, value: str) -> None:
         """Set a configuration value for a snap service."""
         assert 0 == subprocess.call(
             f"sudo snap set dcgm {config}={value}".split()
         ), f"Failed to set {config} to {value}"
+
+        subprocess.run(f"sudo snap restart {service}".split(), check=True)
+
+    @retry(wait=wait_fixed(2), stop=stop_after_delay(10))
+    def unset_config(cls, service: str, config: str) -> None:
+        """Unset a configuration value for a snap service."""
+        assert 0 == subprocess.call(
+            f"sudo snap unset dcgm {config}".split()
+        ), f"Failed to unset {config}"
 
         subprocess.run(f"sudo snap restart {service}".split(), check=True)
 
@@ -101,7 +110,7 @@ class TestDCGMConfigs:
         :param metric_file: The metric file to check for, if empty check if nothing is loaded
         """
         result = subprocess.check_output(
-            "ps -eo cmd | grep '/bin/[d]cgm-exporter'", shell=True, text=True
+            "ps -C dcgm-exporter -o cmd".split(), text=True
         )
 
         if metric_file:
@@ -159,7 +168,7 @@ class TestDCGMConfigs:
         yield
 
         # Revert back
-        cls.set_config(cls.service, cls.config)
+        cls.unset_config(cls.service, cls.config)
         cls.check_metric_config()
 
     @pytest.mark.usefixtures("metric_setup")
@@ -193,7 +202,7 @@ class TestDCGMConfigs:
 
         The exporter will fail to start due to the invalid metric file
         """
-        metric_file = "empty-metrics.csv"
+        metric_file = "invalid-metrics.csv"
         metric_file_path = os.path.join(self.snap_common, metric_file)
         # $SNAP_COMMON requires root permissions to create a file
         subprocess.check_call(f"echo 'test' | sudo tee {metric_file_path}", shell=True)
