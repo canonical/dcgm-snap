@@ -72,8 +72,9 @@ class TestDCGMConfigs:
             f"sudo snap set dcgm {config}={value}".split()
         ), f"Failed to set {config} to {value}"
 
-        subprocess.run(f"sudo snap restart {service}".split(), check=True)
+        subprocess.check_call(f"sudo snap restart {service}".split())
 
+    @classmethod
     @retry(wait=wait_fixed(2), stop=stop_after_delay(10))
     def unset_config(cls, service: str, config: str) -> None:
         """Unset a configuration value for a snap service."""
@@ -81,7 +82,7 @@ class TestDCGMConfigs:
             f"sudo snap unset dcgm {config}".split()
         ), f"Failed to unset {config}"
 
-        subprocess.run(f"sudo snap restart {service}".split(), check=True)
+        subprocess.check_call(f"sudo snap restart {service}".split())
 
     @classmethod
     @retry(wait=wait_fixed(2), stop=stop_after_delay(10))
@@ -109,9 +110,7 @@ class TestDCGMConfigs:
 
         :param metric_file: The metric file to check for, if empty check if nothing is loaded
         """
-        result = subprocess.check_output(
-            "ps -C dcgm-exporter -o cmd".split(), text=True
-        )
+        result = subprocess.check_output("ps -C dcgm-exporter -o cmd".split(), text=True)
 
         if metric_file:
             assert f"-f {metric_file}" in result, f"Metric file {metric_file} is not loaded"
