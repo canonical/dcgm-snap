@@ -6,7 +6,8 @@ license: Apache-2.0
 contact: solutions-engineering@lists.canonical.com
 description: |
   This snap includes NVIDIA DCGM and DCGM-Exporter to manage and monitor NVIDIA GPUs via the CLI or via Prometheus metrics.
-  For instance, the snap can be used to collect the metrics and make Grafana dashboard for data visualization.
+  Grafana dashboards can then be used to visualize the exported metrics, see for example:
+  https://grafana.com/grafana/dashboards/12239-nvidia-dcgm-exporter-dashboard/
 
   The snap includes the following components:
   - DCGM: Data Center GPU Manager
@@ -17,7 +18,7 @@ description: |
   **How-To**
   ---
 
-  **Install the snap**
+  **How to install the snap:**
 
   ```
   sudo snap install dcgm
@@ -26,17 +27,14 @@ description: |
   **How to enable metrics collection:**
 
   ```
-  # Start the DCGM-Exporter service
+  # Start the DCGM-Exporter service (disabled by default)
   sudo snap start dcgm.dcgm-exporter
 
   # Get the metrics
   curl -s localhost:9400/metrics
   ```
 
-  **Note**: The `DCGM-Exporter` service is disabled by default. If you wish to collect metrics for monitoring,
-  see how to enable the exporter in the section above.
-
-  **How to configure the snap services**
+  **How to configure the snap services:**
 
   The DCGM snap provides several configuration options that can be customized through the `snap` CLI.
   For example:
@@ -55,18 +53,21 @@ description: |
   **Reference**
   ---
 
-  Configurations available:
+  Available configurations options:
 
-  - `nv-hostengine-port`: The port on which the NV-Hostengine listens.
+  - `nv-hostengine-port`: the port on which the NV-Hostengine listens.
     The default is `5555`.
-  - `dcgm-exporter-address`: The bind address which the DCGM-Exporter exposes for the metrics.
+  - `dcgm-exporter-address`: the address DCGM-Exporter binds to.
     The default is `:9400`.
-  - `dcgm-exporter-metrics-file`: The name of the custom CSV metrics file can be provided (only the name, not the path).
-    The file should be placed in the `/var/snap/dcgm/common/` directory.
+  - `dcgm-exporter-metrics-file`: the name of a custom CSV metrics file to be loaded by the exporter.
+    The path is assumed to be `/var/snap/dcgm/common/`.
     The default metrics are located in `/snap/dcgm/current/etc/dcgm-exporter/default-counters.csv`.
     Please refer to the DCGM-Exporter repository link at the bottom of the page for more information on the CSV file format.
 
-  This snap does not include the `dcgmproftester`, which is a performance testing tool, to limit the size of the snap.
+  **Limitations**
+  ---
+
+  The DCGM snap does not currently include the performance testing tool `dcgmproftester` in order to limit the size of the snap.
 
   **Links**
   ---
