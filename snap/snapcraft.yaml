@@ -30,7 +30,7 @@ description: |
   sudo snap start dcgm.dcgm-exporter
 
   # Get the metrics
-  curl localhost:9400/metrics
+  curl -s localhost:9400/metrics
   ```
 
   **Note**: The `DCGM-Exporter` service is disabled by default. If you wish to collect metrics for monitoring,
