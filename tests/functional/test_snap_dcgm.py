@@ -138,7 +138,7 @@ class TestDCGMConfigs:
             yield
         finally:
             # Revert back
-            self.set_config(service, config, old_value)
+            self.unset_config(service, config)
             self.check_bind_config(service, old_value)
 
     @pytest.mark.parametrize(
@@ -250,7 +250,7 @@ class TestDCGMConfigs:
         yield
 
         # Revert back
-        cls.set_config(cls.nv_hostengine_service, cls.nv_hostengine_port_config, old_value)
+        cls.unset_config(cls.nv_hostengine_service, cls.nv_hostengine_port_config)
         cls.check_bind_config(cls.nv_hostengine_service, old_value)
         subprocess.check_call(f"sudo snap start {cls.dcgm_exporter_service}".split())
 
