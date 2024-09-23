@@ -96,6 +96,7 @@ apps:
     plugs:
       - network-bind
       - opengl
+      - hardware-observe
     daemon: simple
     # As this is a dcgm snap, not the dcgm-exporter snap,
     # user might not be interested in running dcgm-exporter, so disable it by default
@@ -106,11 +107,13 @@ apps:
     plugs:
       - network-bind
       - opengl
+      - hardware-observe
   nv-hostengine:
     command: bin/run_nv_hostengine.sh
     plugs:
       - network-bind
       - opengl
+      - hardware-observe
     daemon: simple
     restart-condition: on-abort
     environment:
