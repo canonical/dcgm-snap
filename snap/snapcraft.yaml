@@ -6,7 +6,7 @@ license: Apache-2.0
 contact: solutions-engineering@lists.canonical.com
 description: |
   This snap includes NVIDIA DCGM and DCGM-Exporter to manage and monitor NVIDIA GPUs via the CLI or via Prometheus metrics.
-  Grafana dashboards can then be used to visualize the exported metrics, see for example:
+  Grafana dashboards can then be used to visualize the exported metrics, see for example:\
   https://grafana.com/grafana/dashboards/12239-nvidia-dcgm-exporter-dashboard/
 
   The snap includes the following components:
@@ -32,7 +32,7 @@ description: |
 
   **How to configure the snap services:**
 
-  The DCGM snap provides several configuration options that can be customized through the `snap` CLI.
+  The DCGM snap provides several configuration options that can be customized through the `snap` CLI.\
   For example:
 
      # Get all the configuration options
