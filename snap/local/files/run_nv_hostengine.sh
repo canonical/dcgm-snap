@@ -19,5 +19,5 @@ if [ "$dcgm_exporter_status" == "active" ]; then
 fi
 
 export NVVS_BIN_PATH="${SNAP}/usr/share/nvidia-validation-suite/"
-export LD_LIBRARY_PATH="${SNAP}/usr/lib/x86_64-linux-gnu/"
+export LD_LIBRARY_PATH="${SNAP}/usr/lib/x86_64-linux-gnu/:${LD_LIBRARY_PATH}"
 exec "$SNAP/usr/bin/nv-hostengine" -n --service-account nvidia-dcgm "${args[@]}"
