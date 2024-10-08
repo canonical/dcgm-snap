@@ -18,4 +18,6 @@ if [ "$dcgm_exporter_status" == "active" ]; then
     snapctl restart dcgm.dcgm-exporter
 fi
 
+export NVVS_BIN_PATH="${SNAP}/usr/share/nvidia-validation-suite/"
+export LD_LIBRARY_PATH="${SNAP}/usr/lib/x86_64-linux-gnu/"
 exec "$SNAP/usr/bin/nv-hostengine" -n --service-account nvidia-dcgm "${args[@]}"
