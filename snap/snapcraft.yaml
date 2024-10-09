@@ -84,6 +84,8 @@ platforms:
   arm64:
     build-on: [arm64]
     build-for: [arm64]
+environment:
+  NVVS_BIN_PATH: $SNAP/usr/share/nvidia-validation-suite/
 grade: stable
 confinement: strict
 source-code: https://github.com/canonical/dcgm-snap
