@@ -120,6 +120,24 @@ apps:
     restart-condition: on-abort
     environment:
       DCGM_HOME_DIR: "${SNAP_COMMON}"
+  dcgmproftester10:
+    command: bin/run_dcgmproftester.sh 10
+    plugs:
+      - network-bind
+      - opengl
+      - hardware-observe
+  dcgmproftester11:
+    command: bin/run_dcgmproftester.sh 11
+    plugs:
+      - network-bind
+      - opengl
+      - hardware-observe
+  dcgmproftester12:
+    command: bin/run_dcgmproftester.sh 12
+    plugs:
+      - network-bind
+      - opengl
+      - hardware-observe
 
 parts:
   # This is a workaround to package-repositories not supporting multiple architectures
@@ -151,9 +169,6 @@ parts:
       # Set the Snap version to the same as dcgm deb file
       craftctl set version="${DCGM_VERSION#1:}"
 
-      # Remove dcgmproftesters and related libraries
-      $CRAFT_PROJECT_DIR/snap/local/scripts/remove_dcgmproftester.sh
-
   # This is the DCGM exporter
   dcgm-exporter:
     plugin: go
@@ -175,6 +190,7 @@ parts:
     organize:
       run_nv_hostengine.sh: bin/
       run_dcgm_exporter.sh: bin/
+      run_dcgmproftester.sh: bin/
 
 layout:
   /etc/dcgm-exporter:
