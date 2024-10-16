@@ -67,7 +67,8 @@ description: |
   ---
 
   The snap installs the CUDA keyring, verifying its integrity using `curl` and SHA256 checksums.
-  The keyring also sets up the appropriate source for the DCGM deb package.
+  The keyring also sets up the appropriate source for the DCGM deb package.\
+  For more information, see the CUDA keyring repository link and `curl` documentation at the bottom of the page.
 
   **Links**
   ---
@@ -85,6 +86,9 @@ description: |
 
   Repository for the CUDA keyring and DCGM deb package\
   https://developer.download.nvidia.com/compute/cuda/repos/
+
+  curl Documentation\
+  https://curl.se/docs/manpage.html
 
 platforms:
   amd64:
