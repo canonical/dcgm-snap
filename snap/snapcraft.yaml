@@ -67,7 +67,7 @@ description: |
   ---
 
   The snap installs the CUDA keyring deb package using `curl` and verifies its integrity using SHA256 checksums.
-  During the snap build process, the keyring sets up the appropriate source for the DCGM deb package and verifies its signature.\
+  During the snap build process, the install scripts of the CUDA keyring deb package set up the appropriate source for the DCGM deb package, whose signature is then verified by using the keyring itself.\
   For more information, see the CUDA keyring repository link and `curl` documentation at the bottom of the page.
 
   **Links**
