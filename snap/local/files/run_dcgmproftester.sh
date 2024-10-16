@@ -1,6 +1,8 @@
 #!/bin/bash
 set -euo pipefail
 
+# The wrapper is needed so the build does not fail on ARM, as there is no dcgmproftester10 in the ARM DCGM deb package
+
 if [[ "$1" != "10" && "$1" != "11" && "$1" != "12" ]]; then
     exit 1
 fi
