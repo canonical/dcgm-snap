@@ -63,6 +63,12 @@ description: |
 
   The DCGM snap does not currently include the performance testing tool `dcgmproftester` in order to limit the size of the snap.
 
+  **Cryptography**
+  ---
+
+  The snap installs the CUDA keyring, verifying its integrity using `curl` and SHA256 checksums.
+  The keyring also sets up the appropriate source for the DCGM deb package.
+
   **Links**
   ---
   Upstream DCGM-Exporter repository\
@@ -76,6 +82,9 @@ description: |
 
   Available NVIDIA GPU metrics\
   https://docs.nvidia.com/datacenter/dcgm/latest/dcgm-api/dcgm-api-field-ids.html
+
+  Repository for the CUDA keyring and DCGM deb package\
+  https://developer.download.nvidia.com/compute/cuda/repos/
 
 platforms:
   amd64:
