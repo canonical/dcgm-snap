@@ -116,19 +116,19 @@ apps:
     environment:
       DCGM_HOME_DIR: "${SNAP_COMMON}"
   dcgmproftester10:
-    command: bin/run_dcgmproftester.sh 10
+    command: bin/run_dcgmproftester10.sh
     plugs:
       - network-bind
       - opengl
       - hardware-observe
   dcgmproftester11:
-    command: bin/run_dcgmproftester.sh 11
+    command: usr/bin/dcgmproftester11
     plugs:
       - network-bind
       - opengl
       - hardware-observe
   dcgmproftester12:
-    command: bin/run_dcgmproftester.sh 12
+    command: usr/bin/dcgmproftester12
     plugs:
       - network-bind
       - opengl
@@ -185,7 +185,7 @@ parts:
     organize:
       run_nv_hostengine.sh: bin/
       run_dcgm_exporter.sh: bin/
-      run_dcgmproftester.sh: bin/
+      run_dcgmproftester10.sh: bin/
 
 layout:
   /etc/dcgm-exporter:
