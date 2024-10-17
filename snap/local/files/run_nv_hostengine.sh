@@ -18,4 +18,4 @@ if [ "$dcgm_exporter_status" == "active" ]; then
     snapctl restart dcgm.dcgm-exporter
 fi
 
-exec "$SNAP/usr/bin/nv-hostengine" -n --service-account nvidia-dcgm "${args[@]}"
+exec "$SNAP/usr/bin/nv-hostengine" -n "${args[@]}"

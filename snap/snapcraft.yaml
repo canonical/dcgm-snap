@@ -58,11 +58,6 @@ description: |
     The default metrics are located in `/snap/dcgm/current/etc/dcgm-exporter/default-counters.csv`.
     Please refer to the DCGM-Exporter repository link at the bottom of the page for more information on the CSV file format.
 
-  **Limitations**
-  ---
-
-  The DCGM snap does not currently include the performance testing tool `dcgmproftester` in order to limit the size of the snap.
-
   **Cryptography**
   ---
 
@@ -133,6 +128,24 @@ apps:
     restart-condition: on-abort
     environment:
       DCGM_HOME_DIR: "${SNAP_COMMON}"
+  dcgmproftester10:
+    command: bin/run_dcgmproftester10.sh
+    plugs:
+      - network-bind
+      - opengl
+      - hardware-observe
+  dcgmproftester11:
+    command: usr/bin/dcgmproftester11
+    plugs:
+      - network-bind
+      - opengl
+      - hardware-observe
+  dcgmproftester12:
+    command: usr/bin/dcgmproftester12
+    plugs:
+      - network-bind
+      - opengl
+      - hardware-observe
 
 parts:
   # This is a workaround to package-repositories not supporting multiple architectures
@@ -164,9 +177,6 @@ parts:
       # Set the Snap version to the same as dcgm deb file
       craftctl set version="${DCGM_VERSION#1:}"
 
-      # Remove dcgmproftesters and related libraries
-      $CRAFT_PROJECT_DIR/snap/local/scripts/remove_dcgmproftester.sh
-
   # This is the DCGM exporter
   dcgm-exporter:
     plugin: go
@@ -188,6 +198,7 @@ parts:
     organize:
       run_nv_hostengine.sh: bin/
       run_dcgm_exporter.sh: bin/
+      run_dcgmproftester10.sh: bin/
 
 layout:
   /etc/dcgm-exporter:
