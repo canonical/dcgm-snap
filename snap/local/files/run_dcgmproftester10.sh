@@ -1,7 +1,7 @@
 #!/bin/bash
 set -euo pipefail
 
-# Due to limitations of the snapcraft.yaml, this wrapper is needed for the build to not fail for ARM, 
+# Due to limitations of the snapcraft.yaml syntax, apps cannot be enabled or disabled depending on the build architecture. This wrapper allows the ARM build to not fail and avoids having to maintain two separate snapcraft.yaml files 
 # as there is no dcgmproftester10 in the ARM DCGM deb package
 
 BINARY="$SNAP/usr/bin/dcgmproftester10"
