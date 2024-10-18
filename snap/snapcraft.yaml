@@ -59,10 +59,12 @@ description: |
     The default metrics are located in `/snap/dcgm/current/etc/dcgm-exporter/default-counters.csv`.
     Please refer to the DCGM-Exporter repository link at the bottom of the page for more information on the CSV file format.
 
-  **Limitations**
+  **Cryptography**
   ---
 
-  The DCGM snap does not currently include the performance testing tool `dcgmproftester` in order to limit the size of the snap.
+  During the snap build process, snapcraft downloads the CUDA keyring deb package using `curl` over HTTPS and verifies its integrity using SHA256 checksums.
+  The CUDA keyring deb package is then used to set up the appropriate source for the DCGM deb package, whose signature is verified using the keyring.\
+  For more information, see the CUDA keyring repository link and `curl` documentation at the bottom of the page.
 
   **Links**
   ---
@@ -77,6 +79,12 @@ description: |
 
   Available NVIDIA GPU metrics\
   https://docs.nvidia.com/datacenter/dcgm/latest/dcgm-api/dcgm-api-field-ids.html
+
+  Repository for the CUDA keyring and DCGM deb package\
+  https://developer.download.nvidia.com/compute/cuda/repos/
+
+  curl Documentation\
+  https://curl.se/docs/manpage.html
 
 platforms:
   amd64:
@@ -121,6 +129,24 @@ apps:
     restart-condition: on-abort
     environment:
       DCGM_HOME_DIR: "${SNAP_COMMON}"
+  dcgmproftester10:
+    command: bin/run_dcgmproftester10.sh
+    plugs:
+      - network-bind
+      - opengl
+      - hardware-observe
+  dcgmproftester11:
+    command: usr/bin/dcgmproftester11
+    plugs:
+      - network-bind
+      - opengl
+      - hardware-observe
+  dcgmproftester12:
+    command: usr/bin/dcgmproftester12
+    plugs:
+      - network-bind
+      - opengl
+      - hardware-observe
 
 parts:
   # This is a workaround to package-repositories not supporting multiple architectures
@@ -152,9 +178,6 @@ parts:
       # Set the Snap version to the same as dcgm deb file
       craftctl set version="${DCGM_VERSION#1:}"
 
-      # Remove dcgmproftesters and related libraries
-      $CRAFT_PROJECT_DIR/snap/local/scripts/remove_dcgmproftester.sh
-
   # This is the DCGM exporter
   dcgm-exporter:
     plugin: go
@@ -176,6 +199,7 @@ parts:
     organize:
       run_nv_hostengine.sh: bin/
       run_dcgm_exporter.sh: bin/
+      run_dcgmproftester10.sh: bin/
 
 layout:
   /etc/dcgm-exporter:
