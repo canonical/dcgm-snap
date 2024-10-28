@@ -4,7 +4,7 @@ adopt-info: dcgm
 summary: Snap for NVIDIA DCGM and DCGM-Exporter
 license: Apache-2.0
 contact: solutions-engineering@lists.canonical.com
-icon: snap/local/DCGM_logo.png
+icon: snap/local/nvidia-logo-square-wht.svg
 description: |
   This snap includes NVIDIA DCGM and DCGM-Exporter to manage and monitor NVIDIA GPUs via the CLI or via Prometheus metrics.
   Grafana dashboards can then be used to visualize the exported metrics, see for example:\
