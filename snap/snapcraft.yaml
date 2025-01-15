@@ -174,9 +174,10 @@ parts:
 
       # Extract the version from the .deb file
       DCGM_VERSION=$(dpkg-deb -f "$DEB_FILE" Version)
+      GIT_VERSION=$(git -C $CRAFT_PROJECT_DIR describe --always --dirty --abbrev=10)
 
       # Set the Snap version to the same as dcgm deb file
-      craftctl set version="${DCGM_VERSION#1:}"
+      craftctl set version="${DCGM_VERSION#1:}+snap-${GIT_VERSION}"
 
   # This is the DCGM exporter
   dcgm-exporter:
