@@ -113,7 +113,7 @@ class TestDCGMConfigs:
 
     @classmethod
     def get_start_command(cls, program: str) -> str:
-        return subprocess.check_output(f"ps -C {program} -o cmd".split(), text=True)
+        return subprocess.check_output(f"ps -ww -C {program} -o cmd".split(), text=True)
 
     @classmethod
     @retry(wait=wait_fixed(2), stop=stop_after_delay(10))
