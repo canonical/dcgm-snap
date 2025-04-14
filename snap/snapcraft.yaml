@@ -93,6 +93,9 @@ platforms:
   arm64:
     build-on: [arm64]
     build-for: [arm64]
+  s390x:
+    build-on: [s390x]
+    build-for: [s390x]
 environment:
   NVVS_BIN_PATH: $SNAP/usr/share/nvidia-validation-suite/
 grade: stable
