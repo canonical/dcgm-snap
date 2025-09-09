@@ -129,12 +129,6 @@ apps:
     restart-condition: on-abort
     environment:
       DCGM_HOME_DIR: "${SNAP_COMMON}"
-  dcgmproftester10:
-    command: bin/run_dcgmproftester10.sh
-    plugs:
-      - network-bind
-      - opengl
-      - hardware-observe
   dcgmproftester11:
     command: usr/bin/dcgmproftester11
     plugs:
@@ -143,6 +137,12 @@ apps:
       - hardware-observe
   dcgmproftester12:
     command: usr/bin/dcgmproftester12
+    plugs:
+      - network-bind
+      - opengl
+      - hardware-observe
+  dcgmproftester13:
+    command: usr/bin/dcgmproftester13
     plugs:
       - network-bind
       - opengl
@@ -165,16 +165,17 @@ parts:
     after:
       - cuda-sources
     plugin: nil
-    stage-packages: [datacenter-gpu-manager=1:3.3.8]
+    stage-packages:
+      - datacenter-gpu-manager-4-cuda-all=1:4.4.1-1
     # override prime to set version
     override-prime: |
       craftctl default
       # Locate dcgm .deb file
-      DEB_FILE=$(ls $HOME/parts/dcgm/stage_packages/datacenter-gpu-manager_*.deb)
+      DEB_FILE=$(ls $HOME/parts/dcgm/stage_packages/datacenter-gpu-manager-4-core_*.deb)
 
       # Extract the version from the .deb file
       DCGM_VERSION=$(dpkg-deb -f "$DEB_FILE" Version)
-      GIT_VERSION=$(git -C $CRAFT_PROJECT_DIR describe --always --dirty --abbrev=10)
+      GIT_VERSION=$(git -C $CRAFT_PROJECT_DIR describe --always)
 
       # Set the Snap version to the same as dcgm deb file
       craftctl set version="${DCGM_VERSION#1:}+snap-${GIT_VERSION}"
@@ -186,10 +187,10 @@ parts:
       - go
     source: https://github.com/NVIDIA/dcgm-exporter.git
     source-type: git
-    source-tag: 3.3.8-3.6.0
     # override build to get the default csv files from the upstream
     override-build: |
       craftctl default
+
       mkdir -p $SNAPCRAFT_PART_INSTALL/etc/dcgm-exporter
       cp etc/default-counters.csv etc/dcp-metrics-included.csv $SNAPCRAFT_PART_INSTALL/etc/dcgm-exporter/
 
@@ -200,8 +201,11 @@ parts:
     organize:
       run_nv_hostengine.sh: bin/
       run_dcgm_exporter.sh: bin/
-      run_dcgmproftester10.sh: bin/
 
 layout:
   /etc/dcgm-exporter:
     symlink: $SNAP/etc/dcgm-exporter
+  /usr/lib/x86_64-linux-gnu/libdcgm.so.4:
+    bind-file: $SNAP/usr/lib/x86_64-linux-gnu/libdcgm.so.4.4.1
+  /usr/libexec/datacenter-gpu-manager-4:
+    bind: $SNAP/usr/libexec/datacenter-gpu-manager-4

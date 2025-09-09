@@ -2,7 +2,7 @@
 set -euo pipefail
 
 # Build the argument list for the dcgm-exporter command
-args=()
+args=("--disable-startup-validate")
 
 nv_hostengine_port="$(snapctl get nv-hostengine-port)"
 dcgm_exporter_address="$(snapctl get dcgm-exporter-address)"
