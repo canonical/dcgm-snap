@@ -21,29 +21,29 @@ description: |
 
   **How to install the snap:**
 
-     sudo snap install dcgm
+    sudo snap install dcgm
 
   **How to enable metrics collection:**
 
-     # Start the DCGM-Exporter service (disabled by default)
-     sudo snap start dcgm.dcgm-exporter
+    # Start the DCGM-Exporter service (disabled by default)
+    sudo snap start dcgm.dcgm-exporter
 
-     # Get the metrics
-     curl -s localhost:9400/metrics
+    # Get the metrics
+    curl -s localhost:9400/metrics
 
   **How to configure the snap services:**
 
   The NV-Hostengine and DCGM-Exporter services can be configured via the `snap` CLI.\
   For example:
 
-     # Get all the configuration options
-     sudo snap get dcgm
+    # Get all the configuration options
+    sudo snap get dcgm
 
-     # Set the NV-Hostengine port
-     sudo snap set dcgm nv-hostengine-port=5577
+    # Set the NV-Hostengine port
+    sudo snap set dcgm nv-hostengine-port=5577
 
-     # Restart the NV-Hostengine service to apply the changes
-     sudo snap restart dcgm.nv-hostengine
+    # Restart the NV-Hostengine service to apply the changes
+    sudo snap restart dcgm.nv-hostengine
 
   **Reference**
   ---
@@ -129,20 +129,8 @@ apps:
     restart-condition: on-abort
     environment:
       DCGM_HOME_DIR: "${SNAP_COMMON}"
-  dcgmproftester11:
-    command: usr/bin/dcgmproftester11
-    plugs:
-      - network-bind
-      - opengl
-      - hardware-observe
-  dcgmproftester12:
-    command: usr/bin/dcgmproftester12
-    plugs:
-      - network-bind
-      - opengl
-      - hardware-observe
-  dcgmproftester13:
-    command: usr/bin/dcgmproftester13
+  dcgmproftester:
+    command: usr/bin/dcgmproftester${CUDA_VERSION}
     plugs:
       - network-bind
       - opengl
@@ -165,20 +153,29 @@ parts:
     after:
       - cuda-sources
     plugin: nil
-    stage-packages:
-      - datacenter-gpu-manager-4-cuda-all=1:4.4.1-1
+
+    override-pull: |
+      craftctl default
+      apt download datacenter-gpu-manager-4-cuda${CUDA_VERSION}=1:4.4.1-1
+      apt download $(apt-cache depends datacenter-gpu-manager-4-cuda${CUDA_VERSION} | awk '/Depends:/ {print $2}')
+
+    override-build: |
+      craftctl default
+      dpkg-deb -x datacenter-gpu-manager-4-cuda${CUDA_VERSION}_*.deb $SNAPCRAFT_PART_INSTALL/
+      dpkg-deb -x datacenter-gpu-manager-4-core*.deb $SNAPCRAFT_PART_INSTALL/
+
     # override prime to set version
     override-prime: |
       craftctl default
       # Locate dcgm .deb file
-      DEB_FILE=$(ls $HOME/parts/dcgm/stage_packages/datacenter-gpu-manager-4-core_*.deb)
+      DEB_FILE=$(ls $HOME/parts/dcgm/src/datacenter-gpu-manager-4-cuda*.deb)
 
       # Extract the version from the .deb file
       DCGM_VERSION=$(dpkg-deb -f "$DEB_FILE" Version)
       GIT_VERSION=$(git -C $CRAFT_PROJECT_DIR describe --always)
 
       # Set the Snap version to the same as dcgm deb file
-      craftctl set version="${DCGM_VERSION#1:}+snap-${GIT_VERSION}"
+      craftctl set version="${CUDA_VERSION}-${DCGM_VERSION#1:}-${GIT_VERSION}"
 
   # This is the DCGM exporter
   dcgm-exporter:
