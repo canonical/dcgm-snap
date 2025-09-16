@@ -106,11 +106,15 @@ jobs:
       fail-fast: false
       matrix:
         runs-on: [[ubuntu-24.04], [self-hosted, jammy, ARM64]]
+        cuda-version: [11, 12, 13]
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0  # Complete git history is required to generate the version from git tags.
 
+      - name: Build snapcraft.yaml files
+        run: |
+          CUDA_VERSION=${{ matrix.cuda-version }} envsubst '$CUDA_VERSION'  < snap/snapcraft.yaml.in > snap/snapcraft.yaml
       - name: Verify snap builds successfully
         id: build
         uses: canonical/action-build@v1
