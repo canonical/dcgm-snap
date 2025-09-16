@@ -46,7 +46,7 @@ jobs:
 
       - name: Lint yaml files
         run: |
-          yamllint .yamllint snap/snapcraft.yaml
+          yamllint .yamllint snap/snapcraft.yaml.in
 
   unit:
     name: Unit
@@ -115,6 +115,7 @@ jobs:
       - name: Build snapcraft.yaml files
         run: |
           CUDA_VERSION=${{ matrix.cuda-version }} envsubst '$CUDA_VERSION'  < snap/snapcraft.yaml.in > snap/snapcraft.yaml
+
       - name: Verify snap builds successfully
         id: build
         uses: canonical/action-build@v1
@@ -125,7 +126,7 @@ jobs:
       - name: Upload the built snap
         uses: actions/upload-artifact@v4
         with:
-          name: snap_${{ env.SYSTEM_ARCH }}
+          name: snap_${{ matrix.cuda-version }}_${{ env.SYSTEM_ARCH }}
           path: ${{ steps.build.outputs.snap }}
 
   func:
@@ -136,6 +137,7 @@ jobs:
       fail-fast: false
       matrix:
         runs-on: [[ubuntu-24.04], [self-hosted, jammy, ARM64]]
+        cuda-version: [11, 12, 13]
     steps:
       - uses: actions/checkout@v4
         with:
@@ -147,7 +149,7 @@ jobs:
       - name: Download snap file artifact
         uses: actions/download-artifact@v4
         with:
-          name: snap_${{ env.SYSTEM_ARCH }}
+          name: snap_${{ matrix.cuda-version }}_${{ env.SYSTEM_ARCH }}
 
       - name: Set up Python 3.10
         uses: actions/setup-python@v5
@@ -169,7 +171,7 @@ jobs:
         run: |
           BASE_VERSION_SANITIZED=${{ matrix.runs-on }}
           BASE_VERSION_SANITIZED=${BASE_VERSION_SANITIZED//./-}
-          echo "ARTIFACT_SUFFIX=$BASE_VERSION_SANITIZED-${{ env.SYSTEM_ARCH }}" >> $GITHUB_ENV
+          echo "ARTIFACT_SUFFIX=$BASE_VERSION_SANITIZED-${{ matrix.cuda-version }}-${{ env.SYSTEM_ARCH }}" >> $GITHUB_ENV
 
       - name: Rename Functional Test Coverage Artifact
         run: |
