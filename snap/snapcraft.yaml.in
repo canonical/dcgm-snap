@@ -19,9 +19,27 @@ description: |
   **How-To**
   ---
 
+  **How to select a channel:**
+
+  You need to have NVIDIA drivers installed on your system to use this snap.\
+  You can check the version of your NVIDIA driver with the command:
+
+    cat /proc/driver/nvidia/version
+
+  With that information, you can check the compatible CUDA version here:\
+  https://docs.nvidia.com/deploy/cuda-compatibility/minor-version-compatibility.html
+
+  Keep in mind that:
+  DCGM v4 has different releases for different CUDA versions. E.g. if your system has the Driver\
+  version >= 580 it uses CUDA 13, so you should install the snap from the channel `v4-cuda13`
+
+    sudo snap install dcgm --channel=v4-cuda13/stable
+
+  DCGM v3 ships a single package with binaries that works from CUDA 10 up to CUDA 12.
+
   **How to install the snap:**
 
-    sudo snap install dcgm
+    sudo snap install dcgm --channel=<CHANNEL>
 
   **How to enable metrics collection:**
 
@@ -154,6 +172,9 @@ parts:
       - cuda-sources
     plugin: nil
 
+    build-packages:
+      - git
+
     override-pull: |
       craftctl default
       apt download datacenter-gpu-manager-4-cuda${CUDA_VERSION}=1:4.4.1-1
@@ -179,17 +200,9 @@ parts:
 
   # This is the DCGM exporter
   dcgm-exporter:
-    plugin: go
-    build-snaps:
-      - go
-    source: https://github.com/NVIDIA/dcgm-exporter.git
-    source-type: git
-    # override build to get the default csv files from the upstream
-    override-build: |
-      craftctl default
-
-      mkdir -p $SNAPCRAFT_PART_INSTALL/etc/dcgm-exporter
-      cp etc/default-counters.csv etc/dcp-metrics-included.csv $SNAPCRAFT_PART_INSTALL/etc/dcgm-exporter/
+    plugin: nil
+    stage-packages:
+      - datacenter-gpu-manager-exporter=4.5.2-1
 
   # wrappers supporting snap options
   wrapper:

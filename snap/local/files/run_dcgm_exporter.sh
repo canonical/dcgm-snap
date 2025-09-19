@@ -25,4 +25,4 @@ else
     echo "Error: DCGM exporter metrics file not found or empty: $dcgm_exporter_metrics_file_path, using default"
 fi
 
-exec "$SNAP/bin/dcgm-exporter" "${args[@]}"
+exec "dcgm-exporter" "${args[@]}"
