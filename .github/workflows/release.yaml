@@ -23,6 +23,7 @@ jobs:
       fail-fast: false
       matrix:
         runs-on: [[ubuntu-24.04], [self-hosted, jammy, ARM64]]
+        cuda-version: [11, 12, 13]
     steps:
       - uses: actions/checkout@v4
         with:
@@ -34,7 +35,7 @@ jobs:
       - name: Download the built snap from check workflow
         uses: actions/download-artifact@v4
         with:
-          name: snap_${{ env.SYSTEM_ARCH }}
+          name: snap_${{ matrix.cuda-version }}_${{ env.SYSTEM_ARCH }}
 
       - name: Find the downloaded snap file
         run: echo "SNAP_FILE=$(find . -name "*.snap")" >> $GITHUB_ENV
@@ -45,7 +46,7 @@ jobs:
         with:
           snap: ${{ env.SNAP_FILE }}
           # Comma-separated list of channels to release the snap to.
-          release: core24/edge,latest/edge
+          release: v4-cuda${{ matrix.cuda-version }}/edge
 
   notify-on-release-failure:
     runs-on: ubuntu-latest
