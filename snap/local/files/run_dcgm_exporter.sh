@@ -2,6 +2,8 @@
 set -euo pipefail
 
 # Build the argument list for the dcgm-exporter command
+# startup validation dynamic generates and check libs that are not possible in snap confinement
+# See https://github.com/NVIDIA/dcgm-exporter/issues/553
 args=("--disable-startup-validate")
 
 nv_hostengine_port="$(snapctl get nv-hostengine-port)"

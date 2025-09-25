@@ -24,7 +24,7 @@ description: |
   You need to have NVIDIA drivers installed on your system to use this snap.\
   You can check the version of your NVIDIA driver with the command:
 
-    cat /proc/driver/nvidia/version
+     cat /proc/driver/nvidia/version
 
   With that information, you can check the compatible CUDA version here:\
   https://docs.nvidia.com/deploy/cuda-compatibility/minor-version-compatibility.html
@@ -33,35 +33,35 @@ description: |
   DCGM v4 has different releases for different CUDA versions. E.g. if your system has the Driver\
   version >= 580 it uses CUDA 13, so you should install the snap from the channel `v4-cuda13`
 
-    sudo snap install dcgm --channel=v4-cuda13/stable
+     sudo snap install dcgm --channel=v4-cuda13/stable
 
   DCGM v3 ships a single package with binaries that works from CUDA 10 up to CUDA 12.
 
   **How to install the snap:**
 
-    sudo snap install dcgm --channel=<CHANNEL>
+     sudo snap install dcgm --channel=<CHANNEL>
 
   **How to enable metrics collection:**
 
-    # Start the DCGM-Exporter service (disabled by default)
-    sudo snap start dcgm.dcgm-exporter
+     # Start the DCGM-Exporter service (disabled by default)
+     sudo snap start dcgm.dcgm-exporter
 
-    # Get the metrics
-    curl -s localhost:9400/metrics
+     # Get the metrics
+     curl -s localhost:9400/metrics
 
   **How to configure the snap services:**
 
   The NV-Hostengine and DCGM-Exporter services can be configured via the `snap` CLI.\
   For example:
 
-    # Get all the configuration options
-    sudo snap get dcgm
+     # Get all the configuration options
+     sudo snap get dcgm
 
-    # Set the NV-Hostengine port
-    sudo snap set dcgm nv-hostengine-port=5577
+     # Set the NV-Hostengine port
+     sudo snap set dcgm nv-hostengine-port=5577
 
-    # Restart the NV-Hostengine service to apply the changes
-    sudo snap restart dcgm.nv-hostengine
+     # Restart the NV-Hostengine service to apply the changes
+     sudo snap restart dcgm.nv-hostengine
 
   **Reference**
   ---
