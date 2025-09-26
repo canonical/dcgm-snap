@@ -15,6 +15,7 @@ def install_dcgm_snap():
 
     # Manually connect the 'hardware-observe' interface as auto-connect is not allowed
     subprocess.check_call("sudo snap connect dcgm:hardware-observe".split())
+    subprocess.check_call("sudo snap connect dcgm:opengl".split())
 
     subprocess.check_call("sudo snap start dcgm.dcgm-exporter".split())
 

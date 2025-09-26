@@ -5,10 +5,24 @@ The snap consists of [dcgm](https://developer.nvidia.com/dcgm) and [dcgm-exporte
 
 ## Build the snap
 
+From v4, the `snapcraft.yaml` file is dynamically generated using the `snapcraft.yaml.in` file
+as template. To create the file run:
+
+```shell
+# generate v4 using cuda11 packages
+CUDA_VERSION=11 envsubst '$CUDA_VERSION'  < snap/snapcraft.yaml.in > snap/snapcraft.yaml
+
+# generate v4 using cuda12 packages
+CUDA_VERSION=12 envsubst '$CUDA_VERSION'  < snap/snapcraft.yaml.in > snap/snapcraft.yaml
+
+# generate v4 using cuda13 packages
+CUDA_VERSION=13 envsubst '$CUDA_VERSION'  < snap/snapcraft.yaml.in > snap/snapcraft.yaml
+```
+
 You can build the snap locally by using the command:
 
 ```shell
-snapcraft --use-lxd
+snapcraft pack -v
 ```
 
 ## Test

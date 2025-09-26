@@ -2,7 +2,9 @@
 set -euo pipefail
 
 # Build the argument list for the dcgm-exporter command
-args=()
+# startup validation dynamic generates and check libs that are not possible in snap confinement
+# See https://github.com/NVIDIA/dcgm-exporter/issues/553
+args=("--disable-startup-validate")
 
 nv_hostengine_port="$(snapctl get nv-hostengine-port)"
 dcgm_exporter_address="$(snapctl get dcgm-exporter-address)"
@@ -25,4 +27,4 @@ else
     echo "Error: DCGM exporter metrics file not found or empty: $dcgm_exporter_metrics_file_path, using default"
 fi
 
-exec "$SNAP/bin/dcgm-exporter" "${args[@]}"
+exec "dcgm-exporter" "${args[@]}"
