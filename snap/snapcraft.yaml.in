@@ -119,6 +119,14 @@ source-code: https://github.com/canonical/dcgm-snap
 issues: https://github.com/canonical/dcgm-snap/issues
 title: NVIDIA DCGM
 
+plugs:
+  nvidia-driver-daemon:
+    interface: system-files
+    read:
+      - /run/nvidia-persistenced/socket
+    write:
+      - /run/nvidia-persistenced/socket
+
 apps:
   dcgm-exporter:
     command: bin/run_dcgm_exporter.sh
@@ -143,6 +151,8 @@ apps:
       - network-bind
       - opengl
       - hardware-observe
+      - nvidia-driver-daemon
+      - log-observe
     daemon: simple
     restart-condition: on-abort
     environment:
