@@ -3,18 +3,40 @@
 # Register config options if unset,
 # so users can see available options by running
 # `sudo snap get dcgm`.
-if [ -z "$(snapctl get nv-hostengine-port)" ]; then
+
+nv_hostengine_port="$(snapctl get nv-hostengine-port)"
+dcgm_exporter_address="$(snapctl get dcgm-exporter-address)"
+dcgm_exporter_metrics_file="$(snapctl get dcgm-exporter-metrics-file)"
+
+if [ -z "$nv_hostengine_port" ]; then
     # Explictly use default bind port of nv-hostengine binary
     snapctl set nv-hostengine-port="5555"
+else
+    if ! expr "$nv_hostengine_port" : "^[0-9]\+$" > /dev/null || [ "$nv_hostengine_port" -lt 1 ] || [ "$nv_hostengine_port" -gt 65535 ]; then
+        echo "Error: Invalid nv-hostengine-port value: $nv_hostengine_port. Must be an integer between 1 and 65535."
+        exit 1
+    fi
 fi
 
-if [ -z "$(snapctl get dcgm-exporter-address)" ]; then
+if [ -z "$dcgm_exporter_address" ]; then
     # Explictly use default bind address of dcgm-exporter binary
     snapctl set dcgm-exporter-address=":9400"
+else
+    if ! expr "$dcgm_exporter_address" : "^:[0-9]\+$" > /dev/null || [ "${dcgm_exporter_address#*:}" -lt 1 ] || [ "${dcgm_exporter_address#*:}" -gt 65535 ]; then
+        echo "Error: Invalid dcgm-exporter-address value: $dcgm_exporter_address. Must be in the format :<port> where <port> is an integer between 1 and 65535."
+        exit 1
+    fi
 fi
 
-if [ -z "$(snapctl get dcgm-exporter-metrics-file)" ]; then
+if [ -z "$dcgm_exporter_metrics_file" ]; then
     # Implicitly use default metrics file of dcgm-exporter binary in $SNAP/etc/dcgm-exporter/default-counters.csv
     # See details: https://github.com/NVIDIA/dcgm-exporter?tab=readme-ov-file#changing-metrics
     snapctl set dcgm-exporter-metrics-file=""
+else
+    dcgm_exporter_metrics_file_path="$SNAP_COMMON/$dcgm_exporter_metrics_file"
+    if ! [ -f "$dcgm_exporter_metrics_file_path" ] || ! [ -s "$dcgm_exporter_metrics_file_path" ]; then
+        echo "Error: DCGM exporter metrics file not found or empty: $dcgm_exporter_metrics_file_path."
+        exit 1
+    fi
 fi
+

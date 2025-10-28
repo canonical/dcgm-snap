@@ -8,9 +8,7 @@ args=("--disable-startup-validate")
 
 nv_hostengine_port="$(snapctl get nv-hostengine-port)"
 dcgm_exporter_address="$(snapctl get dcgm-exporter-address)"
-
-# Add the dcgm-exporter-metrics-file option if it is set.
-dcgm_exporter_metrics_file_path="$SNAP_COMMON/$(snapctl get dcgm-exporter-metrics-file)"
+dcgm_exporter_metrics_file="$(snapctl get dcgm-exporter-metrics-file)"
 
 if [ -n "$dcgm_exporter_address" ]; then
     args+=("-a" "$dcgm_exporter_address")
@@ -21,10 +19,10 @@ if [ -n "$nv_hostengine_port" ]; then
 fi
 
 # File should be available in the snap data directory under $SNAP_COMMON
-if [[ -f "$dcgm_exporter_metrics_file_path" && -s "$dcgm_exporter_metrics_file_path" ]]; then
-    args+=("-f" "$dcgm_exporter_metrics_file_path")
+if [ -n "$dcgm_exporter_metrics_file" ]; then
+    args+=("-f" "$SNAP_COMMON/$dcgm_exporter_metrics_file")
 else
-    echo "Error: DCGM exporter metrics file not found or empty: $dcgm_exporter_metrics_file_path, using default"
+    echo "Using default DCGM exporter metrics file."
 fi
 
 exec "dcgm-exporter" "${args[@]}"
