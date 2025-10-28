@@ -73,7 +73,7 @@ class TestDCGMComponents:
 
 class TestDCGMConfigs:
     @classmethod
-    @retry(wait=wait_fixed(2), stop=stop_after_delay(10))
+    @retry(wait=wait_fixed(2), stop=stop_after_delay(10), reraise=True)
     def set_config(cls, service: str, config: str, value: str) -> None:
         """Set a configuration value for a snap service and restart to apply."""
         assert 0 == subprocess.call(
@@ -157,13 +157,20 @@ class TestDCGMConfigs:
         "service, config, new_value",
         [
             ("dcgm.dcgm-exporter", "dcgm-exporter-address", "test"),
+            ("dcgm.dcgm-exporter", "dcgm-exporter-address", ":test"),
+            ("dcgm.dcgm-exporter", "dcgm-exporter-address", ":70000"),
             ("dcgm.nv-hostengine", "nv-hostengine-port", "test"),
+            ("dcgm.nv-hostengine", "nv-hostengine-port", "70000"),
         ],
     )
     def test_invalid_bind_config(self, service: str, config: str, new_value: str) -> None:
         """Test invalid snap bind configuration."""
-        with self.bind_config(service, config, new_value):
-            _check_service_failed(f"snap.{service}")
+        try:
+            self.set_config(service, config, new_value)
+            pytest.fail(f"Setting invalid value {new_value} for {config} did not fail")
+        except AssertionError:
+            pass
+        _check_service_active(f"snap.{service}")
 
     @classmethod
     @pytest.fixture
@@ -193,7 +200,11 @@ class TestDCGMConfigs:
         # $SNAP_COMMON requires root permissions to create a file
         subprocess.check_call(f"sudo touch {metric_file_path}".split())
 
-        self.set_config(self.service, self.config, metric_file)
+        try:
+            self.set_config(self.service, self.config, metric_file)
+            pytest.fail("Setting an empty metric file did not fail")
+        except AssertionError:
+            pass
         self.check_metric_config()
         _check_endpoint(self.endpoint)
 
@@ -203,7 +214,11 @@ class TestDCGMConfigs:
 
         Non-existing files will not be passed to the exporter.
         """
-        self.set_config(self.service, self.config, "unknown.csv")
+        try:
+            self.set_config(self.service, self.config, "unknown.csv")
+            pytest.fail("Setting a non-existing metric file did not fail")
+        except AssertionError:
+            pass
         self.check_metric_config()
         _check_endpoint(self.endpoint)
 
@@ -241,6 +256,7 @@ class TestDCGMConfigs:
     @classmethod
     @pytest.fixture
     def dependency_setup(cls):
+        """Fixture for bind configuration dependency tests."""
         cls.nv_hostengine_port_config = "nv-hostengine-port"
         cls.nv_hostengine_service = "dcgm.nv-hostengine"
         cls.dcgm_exporter_service = "dcgm.dcgm-exporter"
