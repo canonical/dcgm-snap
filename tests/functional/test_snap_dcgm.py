@@ -97,7 +97,7 @@ class TestDCGMConfigs:
     def check_bind_config(cls, service: str, bind: str) -> None:
         """Check if a service is listening on a specific bind."""
         assert 0 == subprocess.call(
-            f"nc -z localhost {bind.lstrip(':')}".split()
+            f"nc -z localhost {bind.split(':')[-1]}".split()
         ), f"{service} is not listening on {bind}"
 
     @classmethod
@@ -145,6 +145,7 @@ class TestDCGMConfigs:
         "service, config, new_value",
         [
             ("dcgm.dcgm-exporter", "dcgm-exporter-address", ":9466"),
+            ("dcgm.dcgm-exporter", "dcgm-exporter-address", "localhost:9400"),
             ("dcgm.nv-hostengine", "nv-hostengine-port", "5566"),
         ],
     )
@@ -159,6 +160,9 @@ class TestDCGMConfigs:
             ("dcgm.dcgm-exporter", "dcgm-exporter-address", "test"),
             ("dcgm.dcgm-exporter", "dcgm-exporter-address", ":test"),
             ("dcgm.dcgm-exporter", "dcgm-exporter-address", ":70000"),
+            ("dcgm.dcgm-exporter", "dcgm-exporter-address", "host:"),
+            ("dcgm.dcgm-exporter", "dcgm-exporter-address", "host:70000"),
+            ("dcgm.dcgm-exporter", "dcgm-exporter-address", "#host:9400"),
             ("dcgm.nv-hostengine", "nv-hostengine-port", "test"),
             ("dcgm.nv-hostengine", "nv-hostengine-port", "70000"),
         ],
