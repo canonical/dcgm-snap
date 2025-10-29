@@ -21,8 +21,6 @@ fi
 # File should be available in the snap data directory under $SNAP_COMMON
 if [ -n "$dcgm_exporter_metrics_file" ]; then
     args+=("-f" "$SNAP_COMMON/$dcgm_exporter_metrics_file")
-else
-    echo "Using default DCGM exporter metrics file."
 fi
 
 exec "dcgm-exporter" "${args[@]}"

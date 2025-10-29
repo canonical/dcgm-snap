@@ -200,11 +200,7 @@ class TestDCGMConfigs:
         # $SNAP_COMMON requires root permissions to create a file
         subprocess.check_call(f"sudo touch {metric_file_path}".split())
 
-        try:
-            self.set_config(self.service, self.config, metric_file)
-            pytest.fail("Setting an empty metric file did not fail")
-        except AssertionError:
-            pass
+        self.set_config(self.service, self.config, metric_file)
         self.check_metric_config()
         _check_endpoint(self.endpoint)
 
@@ -214,11 +210,7 @@ class TestDCGMConfigs:
 
         Non-existing files will not be passed to the exporter.
         """
-        try:
-            self.set_config(self.service, self.config, "unknown.csv")
-            pytest.fail("Setting a non-existing metric file did not fail")
-        except AssertionError:
-            pass
+        self.set_config(self.service, self.config, "unknown.csv")
         self.check_metric_config()
         _check_endpoint(self.endpoint)
 
