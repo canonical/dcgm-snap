@@ -25,7 +25,7 @@ if [ -z "$dcgm_exporter_address" ]; then
     # Explictly use default bind address of dcgm-exporter binary
     snapctl set dcgm-exporter-address="localhost:9400"
 else
-    if ! expr "$dcgm_exporter_address" : '^[a-zA-Z0-9.-]\{0,254\}:[0-9]\+$' > /dev/null ||
+    if ! expr "$dcgm_exporter_address" : '^\(\([a-zA-Z0-9.-]\{1,254\}\|[[].*[]]\)\):[0-9]\+$' > /dev/null ||
        [ "${dcgm_exporter_address#*:}" -lt 1 ] ||
        [ "${dcgm_exporter_address#*:}" -gt 65535 ]
     then

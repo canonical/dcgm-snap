@@ -96,9 +96,12 @@ class TestDCGMConfigs:
     @retry(wait=wait_fixed(2), stop=stop_after_delay(10))
     def check_bind_config(cls, service: str, bind: str) -> None:
         """Check if a service is listening on a specific bind."""
+        port = bind.split(":")[-1]
+        host = (bind.rsplit(":", 1)[0] or "localhost").replace("[", "").replace("]", "")
+
         assert 0 == subprocess.call(
-            f"nc -z localhost {bind.split(':')[-1]}".split()
-        ), f"{service} is not listening on {bind}"
+            f"nc -z {host} {port}".split()
+        ), f"{service} is not listening on {host}:{port}"
 
     @classmethod
     def get_config(cls, config: str) -> str:
@@ -146,6 +149,8 @@ class TestDCGMConfigs:
         [
             ("dcgm.dcgm-exporter", "dcgm-exporter-address", ":9466"),
             ("dcgm.dcgm-exporter", "dcgm-exporter-address", "localhost:9400"),
+            ("dcgm.dcgm-exporter", "dcgm-exporter-address", "[::]:9500"),
+            ("dcgm.dcgm-exporter", "dcgm-exporter-address", "[::1]:9500"),
             ("dcgm.nv-hostengine", "nv-hostengine-port", "5566"),
         ],
     )
@@ -161,6 +166,9 @@ class TestDCGMConfigs:
             ("dcgm.dcgm-exporter", "dcgm-exporter-address", ":test"),
             ("dcgm.dcgm-exporter", "dcgm-exporter-address", ":70000"),
             ("dcgm.dcgm-exporter", "dcgm-exporter-address", "host:"),
+            ("dcgm.dcgm-exporter", "dcgm-exporter-address", "host9400"),
+            ("dcgm.dcgm-exporter", "dcgm-exporter-address", "[::1]9400"),
+            ("dcgm.dcgm-exporter", "dcgm-exporter-address", "::1:9400"),
             ("dcgm.dcgm-exporter", "dcgm-exporter-address", "host:70000"),
             ("dcgm.dcgm-exporter", "dcgm-exporter-address", "#host:9400"),
             ("dcgm.nv-hostengine", "nv-hostengine-port", "test"),
