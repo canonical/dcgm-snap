@@ -96,8 +96,12 @@ class TestDCGMConfigs:
     @retry(wait=wait_fixed(2), stop=stop_after_delay(10))
     def check_bind_config(cls, service: str, bind: str) -> None:
         """Check if a service is listening on a specific bind."""
-        port = bind.split(":")[-1]
-        host = (bind.rsplit(":", 1)[0] or "localhost").replace("[", "").replace("]", "")
+        parts = bind.rsplit(":", 1)
+        port = parts[-1]
+        if len(parts) == 2:
+            host = (parts[0] or "localhost").replace("[", "").replace("]", "")
+        else:
+            host = "localhost"
 
         assert 0 == subprocess.call(
             f"nc -z {host} {port}".split()
