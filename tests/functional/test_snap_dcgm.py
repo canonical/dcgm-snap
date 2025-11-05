@@ -73,7 +73,7 @@ class TestDCGMComponents:
 
 class TestDCGMConfigs:
     @classmethod
-    @retry(wait=wait_fixed(2), stop=stop_after_delay(10))
+    @retry(wait=wait_fixed(2), stop=stop_after_delay(10), reraise=True)
     def set_config(cls, service: str, config: str, value: str) -> None:
         """Set a configuration value for a snap service and restart to apply."""
         assert 0 == subprocess.call(
@@ -96,9 +96,16 @@ class TestDCGMConfigs:
     @retry(wait=wait_fixed(2), stop=stop_after_delay(10))
     def check_bind_config(cls, service: str, bind: str) -> None:
         """Check if a service is listening on a specific bind."""
+        parts = bind.rsplit(":", 1)
+        port = parts[-1]
+        if len(parts) == 2:
+            host = (parts[0] or "localhost").replace("[", "").replace("]", "")
+        else:
+            host = "localhost"
+
         assert 0 == subprocess.call(
-            f"nc -z localhost {bind.lstrip(':')}".split()
-        ), f"{service} is not listening on {bind}"
+            f"nc -z {host} {port}".split()
+        ), f"{service} is not listening on {host}:{port}"
 
     @classmethod
     def get_config(cls, config: str) -> str:
@@ -145,6 +152,9 @@ class TestDCGMConfigs:
         "service, config, new_value",
         [
             ("dcgm.dcgm-exporter", "dcgm-exporter-address", ":9466"),
+            ("dcgm.dcgm-exporter", "dcgm-exporter-address", "localhost:9400"),
+            ("dcgm.dcgm-exporter", "dcgm-exporter-address", "[::]:9500"),
+            ("dcgm.dcgm-exporter", "dcgm-exporter-address", "[::1]:9500"),
             ("dcgm.nv-hostengine", "nv-hostengine-port", "5566"),
         ],
     )
@@ -157,13 +167,26 @@ class TestDCGMConfigs:
         "service, config, new_value",
         [
             ("dcgm.dcgm-exporter", "dcgm-exporter-address", "test"),
+            ("dcgm.dcgm-exporter", "dcgm-exporter-address", ":test"),
+            ("dcgm.dcgm-exporter", "dcgm-exporter-address", ":70000"),
+            ("dcgm.dcgm-exporter", "dcgm-exporter-address", "host:"),
+            ("dcgm.dcgm-exporter", "dcgm-exporter-address", "host9400"),
+            ("dcgm.dcgm-exporter", "dcgm-exporter-address", "[::1]9400"),
+            ("dcgm.dcgm-exporter", "dcgm-exporter-address", "::1:9400"),
+            ("dcgm.dcgm-exporter", "dcgm-exporter-address", "host:70000"),
+            ("dcgm.dcgm-exporter", "dcgm-exporter-address", "#host:9400"),
             ("dcgm.nv-hostengine", "nv-hostengine-port", "test"),
+            ("dcgm.nv-hostengine", "nv-hostengine-port", "70000"),
         ],
     )
     def test_invalid_bind_config(self, service: str, config: str, new_value: str) -> None:
         """Test invalid snap bind configuration."""
-        with self.bind_config(service, config, new_value):
-            _check_service_failed(f"snap.{service}")
+        try:
+            self.set_config(service, config, new_value)
+            pytest.fail(f"Setting invalid value {new_value} for {config} did not fail")
+        except AssertionError:
+            pass
+        _check_service_active(f"snap.{service}")
 
     @classmethod
     @pytest.fixture
@@ -241,6 +264,7 @@ class TestDCGMConfigs:
     @classmethod
     @pytest.fixture
     def dependency_setup(cls):
+        """Fixture for bind configuration dependency tests."""
         cls.nv_hostengine_port_config = "nv-hostengine-port"
         cls.nv_hostengine_service = "dcgm.nv-hostengine"
         cls.dcgm_exporter_service = "dcgm.dcgm-exporter"

@@ -1,20 +1,52 @@
-#!/bin/sh -e
+#!/bin/bash -e
 
 # Register config options if unset,
 # so users can see available options by running
 # `sudo snap get dcgm`.
-if [ -z "$(snapctl get nv-hostengine-port)" ]; then
-    # Explictly use default bind port of nv-hostengine binary
+
+nv_hostengine_port="$(snapctl get nv-hostengine-port)"
+dcgm_exporter_address="$(snapctl get dcgm-exporter-address)"
+dcgm_exporter_metrics_file="$(snapctl get dcgm-exporter-metrics-file)"
+
+if [[ -z "$nv_hostengine_port" ]]; then
+    # Explicitly use the default bind port of nv-hostengine
     snapctl set nv-hostengine-port="5555"
+else
+    if ! [[ "$nv_hostengine_port" =~ ^[0-9]+$ ]]; then
+        echo "Error: nv-hostengine-port must be a numeric value." >&2
+        exit 1
+    fi
+    if (( nv_hostengine_port < 1 || nv_hostengine_port > 65535 )); then
+        echo "Error: Invalid nv-hostengine-port value: $nv_hostengine_port (must be 1–65535)." >&2
+        exit 1
+    fi
 fi
 
-if [ -z "$(snapctl get dcgm-exporter-address)" ]; then
+if [[ -z "$dcgm_exporter_address" ]]; then
     # Explictly use default bind address of dcgm-exporter binary
-    snapctl set dcgm-exporter-address=":9400"
+    snapctl set dcgm-exporter-address="localhost:9400"
+else
+    if ! [[ "$dcgm_exporter_address" =~ ^(([a-zA-Z0-9.-]{1,254}|\[[0-9a-fA-F:]+\]){0,1}):([0-9]+)$ ]]; then
+        echo "Error: Invalid dcgm-exporter-address value: $dcgm_exporter_address (must be in format host:port)." >&2
+        exit 1
+    fi
+    
+    port="${dcgm_exporter_address#*:}"
+    if (( port < 1 || port > 65535 )); then
+        echo "Error: Invalid port dcgm-exporter-address value: $port (must be 1–65535)." >&2
+        exit 1
+    fi
 fi
 
-if [ -z "$(snapctl get dcgm-exporter-metrics-file)" ]; then
+if [[ -z "$dcgm_exporter_metrics_file" ]]; then
     # Implicitly use default metrics file of dcgm-exporter binary in $SNAP/etc/dcgm-exporter/default-counters.csv
     # See details: https://github.com/NVIDIA/dcgm-exporter?tab=readme-ov-file#changing-metrics
     snapctl set dcgm-exporter-metrics-file=""
+else
+    dcgm_exporter_metrics_file_path="$SNAP_COMMON/$dcgm_exporter_metrics_file"
+    if [[ ! -f "$dcgm_exporter_metrics_file_path" || ! -s "$dcgm_exporter_metrics_file_path" ]]; then
+        echo "Warning: Metrics file not found or empty: $dcgm_exporter_metrics_file_path. Using default metrics file." >&2
+        snapctl set dcgm-exporter-metrics-file=""
+    fi
 fi
+
