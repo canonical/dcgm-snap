@@ -177,7 +177,7 @@ parts:
 
     override-pull: |
       craftctl default
-      apt download datacenter-gpu-manager-4-cuda${CUDA_VERSION}=1:4.4.1-1
+      apt download datacenter-gpu-manager-4-cuda${CUDA_VERSION}=1:4.5.2-1
       apt download $(apt-cache depends datacenter-gpu-manager-4-cuda${CUDA_VERSION} | awk '/Depends:/ {print $2}')
 
     override-build: |
@@ -202,7 +202,7 @@ parts:
   dcgm-exporter:
     plugin: nil
     stage-packages:
-      - datacenter-gpu-manager-exporter=4.5.2-1
+      - datacenter-gpu-manager-exporter=4.8.1-1
 
   # wrappers supporting snap options
   wrapper:
@@ -216,6 +216,6 @@ layout:
   /etc/dcgm-exporter:
     symlink: $SNAP/etc/dcgm-exporter
   /usr/lib/x86_64-linux-gnu/libdcgm.so.4:
-    bind-file: $SNAP/usr/lib/x86_64-linux-gnu/libdcgm.so.4.4.1
+    bind-file: $SNAP/usr/lib/x86_64-linux-gnu/libdcgm.so.4.5.2
   /usr/libexec/datacenter-gpu-manager-4:
     bind: $SNAP/usr/libexec/datacenter-gpu-manager-4
