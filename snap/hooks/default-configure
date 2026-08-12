@@ -1,7 +1,9 @@
 #!/bin/bash -e
 
-# If exporter.autostart is set to true in gadget snap, the exporter service is started at installation of dcgm snap
+# If exporter.autostart is set to true in gadget snap, write the key permanently into snapd's local database
 
 autostart="$(snapctl get exporter.autostart)"
 
-[ "$autostart" = "true" ] && snapctl start --enable dcgm.dcgm-exporter
+if [ "$autostart" = "true" ]; then
+    snapctl set exporter.autostart=true
+fi
