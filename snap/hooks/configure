@@ -49,4 +49,9 @@ else
         snapctl set dcgm-exporter-metrics-file=""
     fi
 fi
+# If configuration option exporter.autostart is set to true, start the exporter service
+autostart="$(snapctl get exporter.autostart)"
 
+if [ "$autostart" = "true" ]; then
+    snapctl start --enable dcgm.dcgm-exporter
+fi
