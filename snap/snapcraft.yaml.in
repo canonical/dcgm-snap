@@ -189,7 +189,7 @@ parts:
     override-prime: |
       craftctl default
       # Locate dcgm .deb file
-      DEB_FILE=$(ls $HOME/parts/dcgm/src/datacenter-gpu-manager-4-cuda*.deb)
+      DEB_FILE=$(ls $HOME/parts/dcgm/src/datacenter-gpu-manager-4-cuda${CUDA_VERSION}_*.deb)
 
       # Extract the version from the .deb file
       DCGM_VERSION=$(dpkg-deb -f "$DEB_FILE" Version)
